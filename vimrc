@@ -12,7 +12,12 @@ filetype plugin indent on
 let g:Powerline_theme='skwp'
 let g:Powerline_colorscheme='skwp'
 
-" Solarized
+" Ctrlp ignore this
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip
+
+" Solarized only in mvim
+" i'm in the mood for different 
+" terminal colors
 set background=dark
 colorscheme solarized
 call togglebg#map("<F5>")
@@ -39,16 +44,12 @@ set smarttab
 " No swap
 set noswapfile
 
-" Use spaces not tabs
-set expandtab
-set tabstop=2
-
-" Number of spaces to use for each step of (auto)indent
-set shiftwidth=2
-
 " Show matches as pattern is being typed
 set incsearch
 set hlsearch
+
+" Always good convetion
+set textwidth=80
 
 " change leader
 let mapleader=","
@@ -75,3 +76,53 @@ set pastetoggle=§
 
 " Line wrapping
 set wrap
+
+" default tabsettings
+set expandtab
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+
+" Python is 4 spaces
+au FileType python setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+" Ruby is 2 spaces
+au Filetype ruby setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+" Javascript is 2 spaces
+au Filetype javascript  setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+
+if has("gui_macvim")
+	"tab mappings
+	map <D-1> 1gt
+	map <D-2> 2gt
+	map <D-3> 3gt
+	map <D-4> 4gt
+	map <D-5> 5gt
+	map <D-6> 6gt
+	map <D-7> 7gt
+	map <D-8> 8gt
+	map <D-9> 9gt
+	map <D-t> :tabnew<CR>
+	map <D-t> :tabclose<CR>
+
+	"macvim stuff
+	set guioptions-=T
+	set guioptions-=r
+	set guioptions-=L
+	set guifont=Source\ Code\ Pro:h14
+    set lines=80 columns=100
+endif
+
+" I need to be forced not tu use the arrow keys, this disables them
+nnoremap <up> <nop>
+nnoremap <down> <nop>
+nnoremap <left> <nop>
+nnoremap <right> <nop>
+inoremap <up> <nop>
+inoremap <down> <nop>
+inoremap <left> <nop>
+inoremap <right> <nop>
+nnoremap j gj
+nnoremap k gk
+
+" Ack.vim search for current line with <leader>a
+noremap <Leader>a :Ack <cword><cr>
