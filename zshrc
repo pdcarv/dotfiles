@@ -31,6 +31,7 @@ PROMPT='
 
 export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/texbin:/usr/X11/bin
 export PATH="$PATH:$HOME/scripts"
+export PATH="$PATH:$HOME/bin"
 export PATH="$PATH:$HOME/.rbenv/bin"
 export PATH="$PATH:/usr/local/mongodb/bin" 
 export EDITOR="vim"
