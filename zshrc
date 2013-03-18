@@ -38,6 +38,7 @@ export EDITOR="vim"
 
 # Aliases
 alias ls='ls -G'
+alias git-root='cd $(git rev-parse --show-toplevel)'
 
 # Virtualenvwrapper
 source /usr/local/bin/virtualenvwrapper.sh
