@@ -8,19 +8,35 @@ call pathogen#infect()
 syntax on
 filetype plugin indent on
 
-" Powerline solarized theme
-let g:Powerline_theme='skwp'
-let g:Powerline_colorscheme='skwp'
-
 " Ctrlp ignore this
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip
+
+" Powerline solarized theme
+"let g:Powerline_theme='skwp'
+"let g:Powerline_colorscheme='skwp'
+
+" Tagbar configuration
+let g:tagbar_width=26                          
+nmap <F8> :TagbarToggle<CR>
+
+" Easytags config
+set tags=./tags
+let g:easytags_dynamic_files=1
 
 " Solarized only in mvim
 " i'm in the mood for different 
 " terminal colors
+"
 set background=dark
 colorscheme solarized
 call togglebg#map("<F5>")
+
+if has("gui_running")
+    colorscheme tronlegacy
+endif
+
+" We want to see the current line
+set cursorline
 
 " Do not forces to save changes in bg buffers
 set hidden
@@ -64,11 +80,11 @@ set wildignore+=.DS_Store
 
 " I think this should be on in xterm, but it seems
 " to speed up things when tuned explicitly
-set ttyfast
+" set ttyfast
 
 " Some other speed improvements, vim on mac seems so
 " sllllllow
-set lazyredraw
+" set lazyredraw
 set noshowcmd
 
 " Set paste on and off with special key
@@ -76,6 +92,12 @@ set pastetoggle=§
 
 " Line wrapping
 set wrap
+
+" Complete to longest string, like zsh
+set wildmode=longest,list:longest
+
+" Restrict search for tab completion sugestions
+set complete=.,b,u,]
 
 " default tabsettings
 set expandtab
@@ -90,7 +112,7 @@ au Filetype ruby setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
 " Javascript is 2 spaces
 au Filetype javascript  setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
 
-if has("gui_macvim")
+if has("gui_running")
 	"tab mappings
 	map <D-1> 1gt
 	map <D-2> 2gt
