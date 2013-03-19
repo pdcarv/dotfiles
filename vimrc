@@ -23,6 +23,9 @@ nmap <F8> :TagbarToggle<CR>
 set tags=./tags
 let g:easytags_dynamic_files=1
 
+" Default ctrlp to filename search insteado of path
+let g:ctrlp_by_filename = 1
+
 " Solarized only in mvim
 " i'm in the mood for different 
 " terminal colors
@@ -104,13 +107,6 @@ set expandtab
 set tabstop=4
 set shiftwidth=4
 set softtabstop=4
-
-" Python is 4 spaces
-au FileType python setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
-" Ruby is 2 spaces
-au Filetype ruby setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
-" Javascript is 2 spaces
-au Filetype javascript  setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
 
 if has("gui_running")
 	"tab mappings
