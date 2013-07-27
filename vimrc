@@ -13,8 +13,10 @@ set wildignore+=*/tmp/*,*.so,*.swp,*.zip
 
 " Default ctrlp to filename search instead of path
 let g:ctrlp_by_filename=1
+let g:ctrlp_by_extensions=['tag'] 
 
-"call togglebg#map("<F5>")
+" change theme background color
+call togglebg#map("<F5>")
 
 " We want to see the current line
 set cursorline
@@ -69,7 +71,7 @@ set pastetoggle=§
 set complete=.,b,u,]
 
 " Fix slow O inserts
-:set timeout timeoutlen=1000 ttimeoutlen=100
+set timeout timeoutlen=1000 ttimeoutlen=100
 
 " Store temporary files in a central spot
 set backup
@@ -83,29 +85,28 @@ set shiftwidth=4
 set softtabstop=4
 
 " Colors
-:set t_Co=256
-:set background=dark
-:color grb256
+set t_Co=256
+set background=dark
+color solarized 
+
+" change theme background color
+call togglebg#map("<F5>")
+
+set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
+
+" Jumps to the last known position in a file after opening it except
+" git commit messages
+autocmd BufReadPost *
+    \ if &ft != 'gitcommit' && line("'\"") > 0 && line("'\"") <= line("$") |
+    \   exe "normal g`\"" |
+    \ endif
 
 if has("gui_running")
-	"tab mappings
-	map <D-1> 1gt
-	map <D-2> 2gt
-	map <D-3> 3gt
-	map <D-4> 4gt
-	map <D-5> 5gt
-	map <D-6> 6gt
-	map <D-7> 7gt
-	map <D-8> 8gt
-	map <D-9> 9gt
-	map <D-t> :tabnew<CR>
-	map <D-t> :tabclose<CR>
-
 	"macvim stuff
 	set guioptions-=T
 	set guioptions-=r
 	set guioptions-=L
-	set guifont=Inconsolata:h14
+	set guifont=Menlo:h14
     set lines=80 columns=100
 endif
 
@@ -125,9 +126,17 @@ nnoremap k gk
 noremap <CR> :nohlsearch<cr>
 
 " Ack.vim search for current line with <leader>a
-noremap <Leader>a :Ack <cword><cr>
+noremap <Leader>a :Ack! <cword><cr>
+ca Ack Ack!
 
-" Jumps to the last known position in a file after opening it
-autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
+" Ctags
+map <F8> :!/usr/local/bin/ctags -R --exclude=.git 
+                                \  --exclude=log 
+                                \  --exclude=tmp .<cr>
+nnoremap <c-o> :CtrlPTag<cr>
 
-:set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
+" run spec on current file with zeus
+nnoremap <leader>zs :!zeus test --format progress % %<cr>
+
+
+
