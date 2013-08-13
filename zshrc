@@ -1,43 +1,56 @@
+autoload -U compinit && compinit
+autoload -U promptinit && promptinit
 autoload -U colors && colors
 autoload -Uz vcs_info
-autoload compinit && compinit
-
-zstyle ':vcs_info:*' enable git hg svn
-zstyle ':vcs_info:git*' stagedstr "%F{28}●"
-zstyle ':vcs_info:git*' unstagedstr "%F{11}●"
-zstyle ':vcs_info:git*' formats "in %{$fg_bold[cyan]%}%b %{$reset_color%}%m%u%c%{$reset_color%} "
-zstyle ':vcs_info:git*' check-for-changes true
-zstyle ':vcs_info:git*' get-revision true
 
 # Tab completion
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ~/.zsh/cache 
 zstyle ':completion:*' special-dirs true
 
-# I want emacs style file searching
+# Emacs style file searching
 bindkey "^R" history-incremental-search-backward
 bindkey "^[[3~" delete-char
-
-precmd () { vcs_info }
-setopt prompt_subst
-
-PROMPT='%{$fg[cyan]%}%1~%{$reset_color%}%{$fg[red]%}|%{$reset_color%}${vcs_info_msg_0_}%{$fg[cyan]%}>%{$reset_color%} '
-
-export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/texbin:/usr/X11/bin
-export PATH="$PATH:$HOME/scripts"
-export PATH="$PATH:$HOME/bin"
-export PATH="$PATH:$HOME/.rbenv/bin"
-export PATH="$PATH:/usr/local/mongodb/bin" 
-export PATH="$PATH:/usr/local/share/npm/bin"
-export PATH="$PATH:/usr/local/go/bin"
 export EDITOR="vim"
 
-# Aliases
-alias ls='ls -G'
-alias git-root='cd $(git rev-parse --show-toplevel)'
+zstyle ':vcs_info:*' enable git hg svn
+zstyle ':vcs_info:*' stagedstr "%F{28}✚"
+zstyle ':vcs_info:git*' unstagedstr "%F{11}●"
+zstyle ':vcs_info:*' check-for-changes true
+zstyle ':vcs_info:*' get-revision true
+zstyle ':vcs_info:*' formats "%m%u%c %b" 
 
-# Virtualenvwrapper
-source /usr/local/bin/virtualenvwrapper.sh
+precmd () { vcs_info }
+
+setopt prompt_subst
+setopt correctall
+setopt auto_menu
+
+PROMPT='%% ' 
+RPROMPT='%{$fg[cyan]%}%~%{$reset_color%} ${vcs_info_msg_0_}'
+
+export PATH=/usr/local/bin:${PATH}
+export PATH="$PATH:$HOME/scripts"
+export PATH="$PATH:$HOME/bin"
+
+export ACK_COLOR_MATCH='magenta'
+
+export HISTSIZE=10000
+export SAVEHIST=10000
+export HISTFILE="$HOME/.history"
+setopt hist_ignore_all_dups
+setopt hist_reduce_blanks
+setopt share_history
+setopt append_history
+
+setopt autocd
+setopt extendedglob
+
+# Aliases
+alias ls="ls -G"
+alias git-root="cd $(git rev-parse --show-toplevel)"
+alias z="zeus $*"
 
 # Rbenv
-eval "$(rbenv init -)"
+export PATH="$PATH:$HOME/.rbenv/bin"
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
