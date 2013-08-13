@@ -106,7 +106,7 @@ if has("gui_running")
 	set guioptions-=T
 	set guioptions-=r
 	set guioptions-=L
-	set guifont=Menlo:h14
+	set guifont=Menlo:h12
     set lines=80 columns=100
 endif
 
@@ -130,9 +130,7 @@ noremap <Leader>a :Ack! <cword><cr>
 ca Ack Ack!
 
 " Ctags
-map <F8> :!/usr/local/bin/ctags -R --exclude=.git 
-                                \  --exclude=log 
-                                \  --exclude=tmp .<cr>
+map <F8> :!/usr/local/bin/ctags .<cr>
 nnoremap <c-o> :CtrlPTag<cr>
 
 " run spec on current file with zeus
