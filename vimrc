@@ -15,9 +15,6 @@ set wildignore+=*/tmp/*,*.so,*.swp,*.zip
 let g:ctrlp_by_filename=1
 let g:ctrlp_by_extensions=['tag'] 
 
-" change theme background color
-call togglebg#map("<F5>")
-
 " We want to see the current line
 set cursorline
 
@@ -86,8 +83,8 @@ set softtabstop=4
 
 " Colors
 set t_Co=256
-set background=dark
-color solarized 
+set background=light
+color pdc 
 
 " change theme background color
 call togglebg#map("<F5>")
