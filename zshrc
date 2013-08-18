@@ -26,8 +26,8 @@ setopt prompt_subst
 setopt correctall
 setopt auto_menu
 
-PROMPT='%% ' 
-RPROMPT='%{$fg[cyan]%}%~%{$reset_color%} ${vcs_info_msg_0_}'
+PROMPT='%% %{$reset_color%}'
+RPROMPT='%{$fg[cyan]%}%~%{$reset_color%} ${vcs_info_msg_0_}%{$reset_color%}'
 
 export PATH=/usr/local/bin:${PATH}
 export PATH="$PATH:$HOME/scripts"
