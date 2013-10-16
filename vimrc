@@ -8,13 +8,6 @@ call pathogen#infect()
 syntax on
 filetype plugin indent on
 
-" Ctrlp ignore this
-set wildignore+=*/tmp/*,*.so,*.swp,*.zip
-
-" Default ctrlp to filename search instead of path
-let g:ctrlp_by_filename=1
-let g:ctrlp_by_extensions=['tag'] 
-
 " We want to see the current line
 set cursorline
 
@@ -57,9 +50,14 @@ set backspace=indent,eol,start
 set wildmenu
 set wildignore+=.git,.svn 
 set wildignore+=.DS_Store
+set wildignore+=*/tmp/*
+set wildignore+=*.so,*.swp
+set wildignore+=*.zip,*.rar
+set wildignore+=*.png,*.jpg
 
 " Complete to longest string, like zsh
 set wildmode=longest,list
+set completeopt=menuone,longest,preview
 
 " Set paste on and off with special key
 set pastetoggle=§
@@ -84,7 +82,7 @@ set softtabstop=4
 " Colors
 set t_Co=256
 set background=light
-color pdc 
+color solarized 
 
 " change theme background color
 call togglebg#map("<F5>")
@@ -123,7 +121,7 @@ nnoremap k gk
 noremap <CR> :nohlsearch<cr>
 
 " Ack.vim search for current line with <leader>a
-noremap <Leader>a :Ack! <cword><cr>
+noremap <Leader>a :Ack! 
 ca Ack Ack!
 
 " Ctags
