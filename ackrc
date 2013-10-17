@@ -1,0 +1,6 @@
+--group
+--sort-files
+--show-types
+
+--type-set=css=sass=scss
+--type-set=html=haml
