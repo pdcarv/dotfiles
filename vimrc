@@ -131,5 +131,8 @@ nnoremap <c-o> :CtrlPTag<cr>
 " run spec on current file with zeus
 nnoremap <leader>zs :!zeus test --format progress % %<cr>
 
+" fold
+nnoremap <Leader>ft Vatzf
+
 
 
