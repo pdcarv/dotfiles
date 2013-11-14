@@ -1,15 +1,16 @@
 " Extracted from multiple dusty files over the course of eons
 " and brought together in the fires of mordor
-
+"
 " We ain't got no time for vi
 set nocompatible
 
-call pathogen#infect()
+execute pathogen#infect()
 syntax on
 filetype plugin indent on
 
 " Uncategorized config
 set number                      " Show line numbers
+set numberwidth=5
 set laststatus=2                
 set history=1000
 set backspace=indent,eol,start
@@ -17,7 +18,6 @@ set hidden                      " Buffers do not need to be in a viewport
 set backspace=2
 let mapleader=","
 set pastetoggle=§               " Set paste on and off with special key
-set cursorline
 
 " Searches
 set incsearch
@@ -41,7 +41,6 @@ filetype plugin indent on
 
 " Status line
 set cmdheight=2
-set showtabline=2
 set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
 
 " Give us autocomplete 
@@ -61,16 +60,15 @@ set completeopt=menuone,longest,preview
 set timeout timeoutlen=1000 ttimeoutlen=100
 
 " Pimp it!
-set t_Co=256
 colorscheme solarized
-set background=light
+set background=dark
 
 if has("gui_running")
     "macvim stuff
     set guioptions-=T
     set guioptions-=r
     set guioptions-=L
-    set guifont=Menlo:h12
+    set guifont=Menlo:h14
     set lines=80 columns=100
 endif
 
@@ -97,16 +95,11 @@ nnoremap k gk
 noremap <Leader>a :Ack! 
 ca Ack Ack!
 
-" CtrlP options
-let g:ctrlp_by_filename=1
-let g:ctrlp_by_extensions=['tag'] 
-
-" Ctags
-map <F8> :!/usr/local/bin/ctags .<cr>
-nnoremap <c-o> :CtrlPTag<cr>
-
 " Run spec on current file with zeus
 nnoremap <leader>zs :!zeus test --format progress % %<cr>
+
+" Run spec on current file
+nnoremap <leader>s :!rake -I. test % %<cr>
 
 " fold
 nnoremap <Leader>ft Vatzf
