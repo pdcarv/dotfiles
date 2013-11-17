@@ -1,0 +1,8 @@
+-R
+--tag-relative=yes
+--fields=+iaS
+--exclude=.git
+--exclude=.svn
+--exclude=log
+--exclude=tmp
+
