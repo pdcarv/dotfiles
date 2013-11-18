@@ -106,5 +106,5 @@ nnoremap <leader>s :!rake -I. test TEST="%" %<cr>
 nnoremap <Leader>ft Vatzf
 
 " Name a tmux window after the open buffer's name
-autocmd BufReadPost,FileReadPost,BufNewFile * call system("tmux rename-window " . expand("%"))
-
+autocmd BufEnter * let &titlestring = ' ' . expand("%:t")
+set title
