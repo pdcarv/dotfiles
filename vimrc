@@ -18,6 +18,7 @@ set hidden                      " Buffers do not need to be in a viewport
 set backspace=2
 let mapleader=","
 set pastetoggle=§               " Set paste on and off with special key
+set autoread                    " When file changes -> auto reload buffer
 
 " Searches
 set incsearch
@@ -60,7 +61,7 @@ set completeopt=menuone,longest,preview
 set timeout timeoutlen=1000 ttimeoutlen=100
 
 " Pimp it!
-colorscheme solarized
+colorscheme base16-mocha
 set background=dark
 
 if has("gui_running")
@@ -91,17 +92,19 @@ inoremap <right> <nop>
 nnoremap j gj
 nnoremap k gk
 
-" Ack.vim search for current line with <leader>a
+" Ack.vim search for current line 
 noremap <Leader>a :Ack! 
 ca Ack Ack!
 
 " Run spec on current file with zeus
 nnoremap <leader>zs :!zeus test --format progress % %<cr>
 
-" Run spec on current file
-nnoremap <leader>s :!rake -I. test % %<cr>
+" Run spec on current file 
+nnoremap <leader>s :!rake -I. test TEST="%" %<cr>
 
-" fold
+" Fold code
 nnoremap <Leader>ft Vatzf
 
+" Name a tmux window after the open buffer's name
+autocmd BufReadPost,FileReadPost,BufNewFile * call system("tmux rename-window " . expand("%"))
 
