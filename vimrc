@@ -11,7 +11,7 @@ filetype plugin indent on
 " Uncategorized config
 set number                      " Show line numbers
 set numberwidth=5
-set laststatus=2                
+set laststatus=2
 set history=1000
 set backspace=indent,eol,start
 set hidden                      " Buffers do not need to be in a viewport
@@ -19,11 +19,12 @@ set backspace=2
 let mapleader=","
 set pastetoggle=§               " Set paste on and off with special key
 set autoread                    " When file changes -> auto reload buffer
+set list listchars=tab:»·,trail:·
 
 " Searches
 set incsearch
 set hlsearch
-noremap <CR> :nohlsearch<cr>    
+noremap <CR> :nohlsearch<cr>
 
 " No swap
 set noswapfile
@@ -44,7 +45,7 @@ filetype plugin indent on
 set cmdheight=2
 set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
 
-" Give us autocomplete 
+" Give us autocomplete
 set wildmenu
 set wildignore+=.git,.svn 
 set wildignore+=.DS_Store
@@ -55,7 +56,7 @@ set wildignore+=*.png,*.jpg
 
 " Complete to longest string, like zsh
 set wildmode=longest,list
-set completeopt=menuone,longest,preview
+set complete=.,w,t
 
 " Fix slow O inserts
 set timeout timeoutlen=1000 ttimeoutlen=100
@@ -63,6 +64,18 @@ set timeout timeoutlen=1000 ttimeoutlen=100
 " Pimp it!
 colorscheme base16-mocha
 set background=dark
+
+" Use The Silver Searcher https://github.com/ggreer/the_silver_searcher
+if executable('ag')
+  " Use Ag over Grep
+  set grepprg=ag\ --nogroup\ --nocolor
+
+  " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
+  let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+
+  " ag is fast enough that CtrlP doesn't need to cache
+  let g:ctrlp_use_caching = 0
+endif
 
 if has("gui_running")
     "macvim stuff
@@ -92,19 +105,44 @@ inoremap <right> <nop>
 nnoremap j gj
 nnoremap k gk
 
-" Ack.vim search for current line 
-noremap <Leader>a :Ack! 
-ca Ack Ack!
+" Move splits with motion keys
+nnoremap <c-j> <c-w>j
+nnoremap <c-k> <c-w>k
+nnoremap <c-h> <c-w>h
+nnoremap <c-l> <c-w>l
 
-" Run spec on current file with zeus
+" Toggle spell checking
+noremap <Leader>sc :set spell!<cr>
+
+" Run specs on current file with zeus
 nnoremap <leader>zs :!zeus test --format progress % %<cr>
 
-" Run spec on current file 
-nnoremap <leader>s :!rake -I. test TEST="%" %<cr>
+" Run spec on current file
+nnoremap <leader>s :!bundle exec rake -I. test TEST="%" %<cr>
 
-" Fold code
-nnoremap <Leader>ft Vatzf
+" Run rspec
+nnoremap <leader>rs :!bundle exec rspec % %<cr>
 
 " Name a tmux window after the open buffer's name
 autocmd BufEnter * let &titlestring = ' ' . expand("%:t")
 set title
+
+" Automatically spell check certain file types
+autocmd FileType gitcommit setlocal spell
+autocmd BufRead,BufNewFile *.md setlocal spell
+
+" Resize splits when the window is resized
+au VimResized * exe "normal! \<c-w>="
+
+" Tab complete when not in begining or end of line
+" Extracted and modified from: http://vim.wikia.com/wiki/Smart_mapping_for_tab_completion
+function! InsertTabWrapper()
+  let col = col('.') - 1
+  if !col || getline('.')[col - 1] !~ '\k'
+    return "\<tab>"
+  else
+    return "\<c-p>"
+  endif
+endfunction
+inoremap <tab> <c-r>=InsertTabWrapper()<cr>
+
