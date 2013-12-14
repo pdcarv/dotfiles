@@ -123,6 +123,9 @@ nnoremap <leader>s :!bundle exec rake -I. test TEST="%" %<cr>
 " Run rspec
 nnoremap <leader>rs :!bundle exec rspec % %<cr>
 
+" Search for word under the cursor and open in quickfix window
+nnoremap <Leader>ag :grep! "\b<c-r><c-w>\b"<cr>:cw<cr>
+
 " Name a tmux window after the open buffer's name
 autocmd BufEnter * let &titlestring = ' ' . expand("%:t")
 set title
