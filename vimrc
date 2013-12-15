@@ -24,7 +24,7 @@ set list listchars=tab:»·,trail:·
 " Searches
 set incsearch
 set hlsearch
-noremap <CR> :nohlsearch<cr>
+noremap <cr> :nohlsearch<cr>
 
 " No swap
 set noswapfile
@@ -47,12 +47,14 @@ set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
 
 " Give us autocomplete
 set wildmenu
-set wildignore+=.git,.svn 
+set wildignore+=.git,.svn
 set wildignore+=.DS_Store
 set wildignore+=*/tmp/*
 set wildignore+=*.so,*.swp
 set wildignore+=*.zip,*.rar
 set wildignore+=*.png,*.jpg
+set wildignore+=*.log
+set wildignore+=*.o,*~,*.pyc
 
 " Complete to longest string, like zsh
 set wildmode=longest,list
@@ -65,16 +67,9 @@ set timeout timeoutlen=1000 ttimeoutlen=100
 colorscheme base16-mocha
 set background=dark
 
-" Use The Silver Searcher https://github.com/ggreer/the_silver_searcher
+" Use The Silver Searcher instead of grep
 if executable('ag')
-  " Use Ag over Grep
   set grepprg=ag\ --nogroup\ --nocolor
-
-  " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
-  let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
-
-  " ag is fast enough that CtrlP doesn't need to cache
-  let g:ctrlp_use_caching = 0
 endif
 
 if has("gui_running")
