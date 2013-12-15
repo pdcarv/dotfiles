@@ -20,6 +20,7 @@ let mapleader=","
 set pastetoggle=§               " Set paste on and off with special key
 set autoread                    " When file changes -> auto reload buffer
 set list listchars=tab:»·,trail:·
+set nofoldenable
 
 " Searches
 set incsearch
@@ -58,10 +59,10 @@ set wildignore+=*.o,*~,*.pyc
 
 " Complete to longest string, like zsh
 set wildmode=longest,list
-set complete=.,w,t
 
 " Fix slow O inserts
 set timeout timeoutlen=1000 ttimeoutlen=100
+set ttyfast
 
 " Pimp it!
 colorscheme base16-mocha
@@ -144,3 +145,5 @@ function! InsertTabWrapper()
 endfunction
 inoremap <tab> <c-r>=InsertTabWrapper()<cr>
 
+" limit command-t height to ten lines
+let g:CommandTMaxHeight=10
