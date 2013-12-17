@@ -28,14 +28,13 @@ alias z="zeus $*"
 alias b="bundle"
 
 function gr() {
- builtin cd $(git rev-parse --show-toplevel) 
+ builtin cd $(git rev-parse --show-toplevel)
 }
 
 export HISTSIZE=10000
 export SAVEHIST=10000
 export HISTFILE="$HOME/.history"
 setopt hist_ignore_all_dups
-setopt hist_ignore_space
 setopt hist_reduce_blanks
 setopt share_history
 setopt append_history
@@ -46,14 +45,18 @@ setopt autocd
 setopt extendedglob
 unsetopt flow_control
 setopt correct correct_all
-setopt menu_complete
+unsetopt menu_complete
+setopt auto_menu
+setopt complete_in_word
+setopt always_to_end
+setopt prompt_subst
 
 autoload -U edit-command-line
 zle -N edit-command-line
 bindkey '^xe' edit-command-line
 
 # command-t like functionality in terminal with selecta
-bindkey -s "^P" " vim \$\(ag --nogroup --nocolor --column -l . 2>/dev/null | selecta\)\n"
+bindkey -s "^P" "vim \$\(ag --nogroup --nocolor --column -l . 2>/dev/null | selecta\)\n"
 
 stty ixany
 stty ixoff -ixon
