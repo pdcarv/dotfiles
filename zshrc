@@ -13,7 +13,7 @@ zstyle ':completion:*' cache-path ~/.zsh/cache
 zstyle ':completion:*:*:kill:*' menu yes select
 zstyle ':completion:*:kill:*'   force-list always
 
-export PATH=/usr/local/bin:/usr/local/sbin/:${PATH}
+export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
 export PATH="$PATH:$HOME/scripts"
 export PATH="$PATH:$HOME/bin"
 export PATH="/usr/local/heroku/bin:$PATH"
