@@ -46,6 +46,9 @@ filetype plugin indent on
 set cmdheight=2
 set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
 
+" Exuberant ctags
+set tags=./tags,tags
+
 " Give us autocomplete
 set wildmenu
 set wildignore+=.git,.svn
