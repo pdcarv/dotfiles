@@ -4,6 +4,8 @@ autoload -U compinit && compinit
 
 # load shell
 source ~/.zsh/pure.zsh
+# install with brew install zsh-completions
+fpath=(/usr/local/share/zsh-completions $fpath)
 
 # Completion stuff
 zstyle ':completion:*' use-cache on
