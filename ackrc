@@ -2,5 +2,9 @@
 --sort-files
 --show-types
 
---type-set=css=sass=scss
---type-set=html=haml
+--type-add
+css=.sass,.scss
+--type-add
+js=.coffee
+--css
+--js
