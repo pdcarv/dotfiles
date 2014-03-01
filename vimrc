@@ -58,7 +58,7 @@ set wildignore+=*.log
 set wildignore+=*.o,*~,*.pyc
 
 " Complete to longest string, like zsh
-set wildmode=longest,list
+set wildmode=list,longest
 
 " Fix slow O inserts
 set timeout timeoutlen=1000 ttimeoutlen=100
@@ -89,6 +89,8 @@ autocmd BufReadPost *
     \   exe "normal g`\"" |
     \ endif
 
+au BufRead,BufNewFile *.coffee setfiletype javascript
+
 " I need to be forced not tu use the arrow keys, this disables them
 nnoremap <up> <nop>
 nnoremap <down> <nop>
@@ -117,7 +119,7 @@ nnoremap <leader>zs :!zeus test --format progress % %<cr>
 nnoremap <leader>s :!bundle exec rake -I. test TEST="%" %<cr>
 
 " Run rspec
-nnoremap <leader>rs :!bundle exec rspec % %<cr>
+nnoremap <leader>rs :Dispatch bundle exec rspec --format progress %<cr>
 
 " Search for word under the cursor and open in quickfix window using Ag plugin
 nnoremap <Leader>ag :Ag! "\b<c-r><c-w>\b"<cr>
@@ -130,7 +132,7 @@ set title
 autocmd FileType gitcommit setlocal spell
 autocmd BufRead,BufNewFile *.md setlocal spell
 
-" Resize splits when the window is resized
+" Resize splits automatically when the window is resized
 au VimResized * exe "normal! \<c-w>="
 
 " Tab complete when not in begining or end of line
@@ -147,3 +149,5 @@ inoremap <tab> <c-r>=InsertTabWrapper()<cr>
 
 " limit command-t height to ten lines
 let g:CommandTMaxHeight=10
+
+noremap <F5> :CommandTFlush<cr>
