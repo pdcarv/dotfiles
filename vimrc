@@ -24,7 +24,6 @@ set list listchars=tab:»·,trail:·
 set nofoldenable
 set ruler
 set cursorline
-set noshowmode
 set textwidth=78
 set showmatch
 
@@ -117,6 +116,9 @@ nnoremap <c-k> <c-w>k
 nnoremap <c-h> <c-w>h
 nnoremap <c-l> <c-w>l
 
+imap jk <Esc>
+" Map semicolon to colon for faster command mode access
+map ; :
 " Toggle spell checking
 noremap <Leader>sc :set spell!<cr>
 
