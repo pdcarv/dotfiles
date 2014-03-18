@@ -28,6 +28,7 @@ alias ll="ls -lG"
 alias la="ls -lGA"
 alias z="zeus $*"
 alias b="bundle"
+alias v="vim"
 
 function gr() {
  builtin cd $(git rev-parse --show-toplevel)
