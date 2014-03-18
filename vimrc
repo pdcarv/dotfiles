@@ -19,11 +19,16 @@ set backspace=2
 let mapleader=","
 set pastetoggle=§               " Set paste on and off with special key
 set autoread                    " When file changes -> auto reload buffer
+set autowrite
 set list listchars=tab:»·,trail:·
 set nofoldenable
+set ruler
+set cursorline
+set noshowmode
+set textwidth=78
+set showmatch
 
 " Searches
-set incsearch
 set hlsearch
 noremap <cr> :nohlsearch<cr>
 
@@ -35,8 +40,8 @@ set nobackup
 set autoindent
 set smartindent
 set smarttab
-set tabstop=4
 set expandtab
+set tabstop=4
 set shiftwidth=4
 set softtabstop=4
 
@@ -61,15 +66,15 @@ set wildignore+=*.log
 set wildignore+=*.o,*~,*.pyc
 
 " Complete to longest string, like zsh
-set wildmode=list,longest
+set wildmode=list,longest,full
 
 " Fix slow O inserts
 set timeout timeoutlen=1000 ttimeoutlen=100
 set ttyfast
 
 " Pimp it!
-colorscheme base16-mocha
-set background=dark
+colorscheme base16-tomorrow
+set background=light
 
 " Use The Silver Searcher instead of grep
 if executable('ag')
