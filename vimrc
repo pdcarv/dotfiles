@@ -158,15 +158,20 @@ au VimResized * exe "normal! \<c-w>="
 
 " Tab complete when not in begining or end of line
 " Extracted and modified from: http://vim.wikia.com/wiki/Smart_mapping_for_tab_completion
-function! InsertTabWrapper()
-  let col = col('.') - 1
-  if !col || getline('.')[col - 1] !~ '\k'
-    return "\<tab>"
+" Use omnicomplete if able for extra futureness
+function! CleverTab()
+  if pumvisible()
+    return "\<C-N>"
+  endif
+  if strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
+    return "\<Tab>"
+  elseif exists('&omnifunc') && &omnifunc != ''
+    return "\<C-X>\<C-O>"
   else
-    return "\<c-p>"
+    return "\<C-N>"
   endif
 endfunction
-inoremap <tab> <c-r>=InsertTabWrapper()<cr>
+inoremap <Tab> <C-R>=CleverTab()<CR>
 
 " limit command-t height to ten lines
 let g:CommandTMaxHeight=10
