@@ -24,7 +24,6 @@ set list listchars=tab:»·,trail:·
 set nofoldenable
 set ruler
 set cursorline
-set textwidth=78
 set showmatch
 
 " Searches
@@ -96,8 +95,6 @@ autocmd BufReadPost *
     \   exe "normal g`\"" |
     \ endif
 
-au BufRead,BufNewFile *.coffee setfiletype javascript
-
 " I need to be forced not tu use the arrow keys, this disables them
 nnoremap <up> <nop>
 nnoremap <down> <nop>
@@ -110,15 +107,18 @@ inoremap <right> <nop>
 nnoremap j gj
 nnoremap k gk
 
+" Cycle through args
+nnoremap <leader>n :next<cr>
+nnoremap <leader>p :previous<cr>
+
 " Move splits with motion keys
-nnoremap <c-j> <c-w>j
-nnoremap <c-k> <c-w>k
-nnoremap <c-h> <c-w>h
-nnoremap <c-l> <c-w>l
+nnoremap <C-j> <C-w><C-j>
+nnoremap <C-k> <C-w><C-k>
+nnoremap <C-h> <C-w><C-h>
+nnoremap <C-l> <C-w><C-l>
 
 imap jk <Esc>
-" Map semicolon to colon for faster command mode access
-map ; :
+
 " Toggle spell checking
 noremap <Leader>sc :set spell!<cr>
 
@@ -131,8 +131,19 @@ nnoremap <leader>s :!bundle exec rake -I. test TEST="%" %<cr>
 " Run rspec
 nnoremap <leader>rs :Dispatch bundle exec rspec --format progress %<cr>
 
-" Search for word under the cursor and open in quickfix window using Ag plugin
-nnoremap <Leader>ag :Ag! "\b<c-r><c-w>\b"<cr>
+" Search for word under the cursor
+" Search for visual selection
+" and open in quickfix window using Ag plugin
+function! GrepIn(type)
+    if a:type ==# 'v'
+        normal! `<v`>y
+    else
+        return
+    endif
+
+    silent execute "Ag! " . shellescape(@@) . " ."
+endfunction
+vnoremap <leader>g :<c-u>call GrepIn(visualmode())<cr>
 
 " Name a tmux window after the open buffer's name
 autocmd BufEnter * let &titlestring = ' ' . expand("%:t")
