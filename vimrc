@@ -25,7 +25,6 @@ set ruler
 set cursorline
 set showmatch
 set showcmd
-set mouse=a
 set switchbuf=useopen
 set title
 
@@ -116,10 +115,9 @@ nnoremap <C-k> <C-w><C-k>
 nnoremap <C-h> <C-w><C-h>
 nnoremap <C-l> <C-w><C-l>
 
-imap jk <Esc>
-
-" Toggle spell checking
-noremap <Leader>sc :set spell!<cr>
+" Reaching is esc is complicated
+inoremap <esc> <nop>
+inoremap jk <esc>
 
 " Run specs on current file with zeus
 nnoremap <leader>zs :!zeus test --format progress % %<cr>
@@ -129,6 +127,10 @@ nnoremap <leader>s :!bundle exec rake -I. test TEST="%" %<cr>
 
 " Run rspec
 nnoremap <leader>rs :Dispatch bundle exec rspec --format progress %<cr>
+
+" Don't think twice when in need of some vimness
+nnoremap <leader>ev :vsplit $MYVIMRC<cr>
+nnoremap <leader>sv :source $MYVIMRC<cr>
 
 " Search for word under the cursor
 " Search for visual selection
@@ -142,7 +144,8 @@ function! GrepIn(type)
 
     silent execute "Ag! " . shellescape(@@) . " ."
 endfunction
-vnoremap <leader>g :<c-u>call GrepIn(visualmode())<cr>
+vnoremap <leader>vg :<c-u>call GrepIn(visualmode())<cr>
+nnoremap <leader>g :silent exe "Ag! " . shellescape(expand("<cWORD>")) . "."<cr>:copen<cr>
 
 " Automatically spell check certain file types
 autocmd FileType gitcommit setlocal spell
@@ -153,17 +156,11 @@ au VimResized * exe "normal! \<c-w>="
 
 " Tab complete when not in begining or end of line
 " Extracted and modified from: http://vim.wikia.com/wiki/Smart_mapping_for_tab_completion
-" Use omnicomplete if able for extra futureness
 function! CleverTab()
-  if pumvisible()
-    return "\<C-N>"
-  endif
-
   if strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
     return "\<Tab>"
   else
     return "\<C-N>"
-  endif
 endfunction
 inoremap <Tab> <C-R>=CleverTab()<CR>
 
@@ -171,3 +168,12 @@ inoremap <Tab> <C-R>=CleverTab()<CR>
 let g:CommandTMaxHeight=10
 
 noremap <F5> :CommandTFlush<cr>
+
+" Open git unstaged files, great to resume work
+function! OpenModified()
+  let status = system("git status --porcelain | sed -ne 's/^ M//p'")
+  let files = join(split(status, "\n"), " ")
+  exe "args" . expand(files)
+endfunction
+command! OpenModified :call OpenModified()
+
