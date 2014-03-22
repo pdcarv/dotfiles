@@ -2,9 +2,7 @@
 --sort-files
 --show-types
 
---type-add
-css=.sass,.scss
---type-add
-js=.coffee
---css
---js
+--type-add=css=scss,sass
+--type-add=ruby=.haml,.erb
+--type-set=coffeescript=.coffee
+--type-set=coffee=.coffee
