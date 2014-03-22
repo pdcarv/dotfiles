@@ -12,7 +12,7 @@ filetype plugin indent on
 set number                      " Show line numbers
 set numberwidth=5
 set laststatus=2
-set history=1000
+set history=10000
 set backspace=indent,eol,start
 set hidden                      " Buffers do not need to be in a viewport
 set backspace=2
@@ -25,6 +25,8 @@ set nofoldenable
 set ruler
 set cursorline
 set showmatch
+set mouse=a
+set switchbuf=useopen
 
 " Searches
 set hlsearch
@@ -39,9 +41,9 @@ set autoindent
 set smartindent
 set smarttab
 set expandtab
-set tabstop=4
-set shiftwidth=4
-set softtabstop=4
+set tabstop=2
+set shiftwidth=2
+set softtabstop=2
 
 filetype plugin indent on
 
@@ -64,7 +66,7 @@ set wildignore+=*.log
 set wildignore+=*.o,*~,*.pyc
 
 " Complete to longest string, like zsh
-set wildmode=list,longest,full
+set wildmode=list:longest,full
 
 " Fix slow O inserts
 set timeout timeoutlen=1000 ttimeoutlen=100
@@ -163,6 +165,7 @@ function! CleverTab()
   if pumvisible()
     return "\<C-N>"
   endif
+
   if strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
     return "\<Tab>"
   elseif exists('&omnifunc') && &omnifunc != ''
