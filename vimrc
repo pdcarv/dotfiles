@@ -19,14 +19,15 @@ set backspace=2
 let mapleader=","
 set pastetoggle=§               " Set paste on and off with special key
 set autoread                    " When file changes -> auto reload buffer
-set autowrite
 set list listchars=tab:»·,trail:·
 set nofoldenable
 set ruler
 set cursorline
 set showmatch
+set showcmd
 set mouse=a
 set switchbuf=useopen
+set title
 
 " Searches
 set hlsearch
@@ -44,8 +45,6 @@ set expandtab
 set tabstop=2
 set shiftwidth=2
 set softtabstop=2
-
-filetype plugin indent on
 
 " Status line
 set cmdheight=2
@@ -66,19 +65,19 @@ set wildignore+=*.log
 set wildignore+=*.o,*~,*.pyc
 
 " Complete to longest string, like zsh
-set wildmode=list:longest,full
+set wildmode=list:longest
 
 " Fix slow O inserts
 set timeout timeoutlen=1000 ttimeoutlen=100
 set ttyfast
 
 " Pimp it!
-colorscheme base16-tomorrow
+colorscheme base16-default
 set background=light
 
 " Use The Silver Searcher instead of grep
 if executable('ag')
-  set grepprg=ag\ --nogroup\ --nocolor
+  set grepprg=ag\ --nogroup\ --nocolor\ --column
 endif
 
 if has("gui_running")
@@ -86,7 +85,7 @@ if has("gui_running")
     set guioptions-=T
     set guioptions-=r
     set guioptions-=L
-    set guifont=Menlo:h14
+    set guifont=Source\ Code\ Pro:h14
     set lines=80 columns=100
 endif
 
@@ -97,7 +96,7 @@ autocmd BufReadPost *
     \   exe "normal g`\"" |
     \ endif
 
-" I need to be forced not tu use the arrow keys, this disables them
+" you need to learn the(by) force
 nnoremap <up> <nop>
 nnoremap <down> <nop>
 nnoremap <left> <nop>
@@ -106,8 +105,6 @@ inoremap <up> <nop>
 inoremap <down> <nop>
 inoremap <left> <nop>
 inoremap <right> <nop>
-nnoremap j gj
-nnoremap k gk
 
 " Cycle through args
 nnoremap <leader>n :next<cr>
@@ -147,10 +144,6 @@ function! GrepIn(type)
 endfunction
 vnoremap <leader>g :<c-u>call GrepIn(visualmode())<cr>
 
-" Name a tmux window after the open buffer's name
-autocmd BufEnter * let &titlestring = ' ' . expand("%:t")
-set title
-
 " Automatically spell check certain file types
 autocmd FileType gitcommit setlocal spell
 autocmd BufRead,BufNewFile *.md setlocal spell
@@ -168,8 +161,6 @@ function! CleverTab()
 
   if strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
     return "\<Tab>"
-  elseif exists('&omnifunc') && &omnifunc != ''
-    return "\<C-X>\<C-O>"
   else
     return "\<C-N>"
   endif
