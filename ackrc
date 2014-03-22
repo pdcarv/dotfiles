@@ -1,8 +1,14 @@
 --group
 --sort-files
 --show-types
+--color
 
 --type-add=css=scss,sass
 --type-add=ruby=.haml,.erb
 --type-set=coffeescript=.coffee
 --type-set=coffee=.coffee
+
+--ignore-dir=.git
+--ignore-dir=.bundle
+--type-set=ctags=.tags
+--noctags
