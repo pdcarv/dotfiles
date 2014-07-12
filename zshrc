@@ -10,14 +10,7 @@ fpath=(/usr/local/share/zsh-completions/ $ZSH/functions $fpath)
 # load shell config
 source $ZSH/prompts/pure.zsh
 source $ZSH/aliases.zsh
-
-# Completion stuff
-zstyle ':completion:*' use-cache on
-zstyle ':completion:*' special-dirs true
-zstyle ':completion:*' menu select
-zstyle ':completion:*' cache-path ~/.zsh/cache
-zstyle ':completion:*:*:kill:*' menu yes select
-zstyle ':completion:*:kill:*'   force-list always
+source $ZSH/completion.zsh
 
 export GOPATH=$HOME/code/go
 export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
@@ -46,10 +39,6 @@ setopt autocd
 setopt extendedglob
 unsetopt flow_control
 setopt correct correct_all
-unsetopt menu_complete
-setopt auto_menu
-setopt complete_in_word
-setopt always_to_end
 setopt prompt_subst
 
 autoload -U edit-command-line
