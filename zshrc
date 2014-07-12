@@ -11,6 +11,7 @@ fpath=(/usr/local/share/zsh-completions/ $ZSH/functions $fpath)
 source $ZSH/prompts/pure.zsh
 source $ZSH/aliases.zsh
 source $ZSH/completion.zsh
+source $ZSH/history.zsh
 
 export GOPATH=$HOME/code/go
 export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
@@ -23,15 +24,6 @@ export NODE_PATH=$NODE_PATH:/usr/local/lib/node_modules
 
 export EDITOR=vim
 set -o emacs
-
-export HISTSIZE=10000
-export SAVEHIST=10000
-export HISTFILE="$HOME/.history"
-setopt hist_ignore_all_dups
-setopt hist_reduce_blanks
-setopt hist_ignore_space
-setopt share_history
-setopt append_history
 
 export ACK_COLOR_MATCH='magenta'
 
