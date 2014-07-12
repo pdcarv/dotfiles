@@ -2,10 +2,14 @@ setopt PROMPT_SUBST
 autoload -U promptinit && promptinit
 autoload -U compinit && compinit
 
-# load shell
-source ~/.zsh/pure.zsh
+export ZSH=$HOME/.zsh
+
 # install with brew install zsh-completions
-fpath=(/usr/local/share/zsh-completions $fpath)
+fpath=(/usr/local/share/zsh-completions/ $ZSH/functions $fpath)
+
+# load shell config
+source $ZSH/prompts/pure.zsh
+source $ZSH/aliases.zsh
 
 # Completion stuff
 zstyle ':completion:*' use-cache on
@@ -15,30 +19,24 @@ zstyle ':completion:*' cache-path ~/.zsh/cache
 zstyle ':completion:*:*:kill:*' menu yes select
 zstyle ':completion:*:kill:*'   force-list always
 
+export GOPATH=$HOME/code/go
 export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
-export PATH="$PATH:$HOME/scripts"
-export PATH="$PATH:$HOME/bin"
-export PATH="/usr/local/heroku/bin:$PATH"
+export PATH=$PATH:$HOME/scripts
+export PATH=$PATH:$HOME/bin
+export PATH=/usr/local/heroku/bin:$PATH
+export PATH=$PATH:$GOPATH/bin
+export PATH=$PATH:$HOME/.rbenv/bin
+export NODE_PATH=$NODE_PATH:/usr/local/lib/node_modules
 
 export EDITOR=vim
 set -o emacs
-
-alias ls="ls -G"
-alias ll="ls -lG"
-alias la="ls -lGA"
-alias z="zeus $*"
-alias b="bundle"
-alias v="vim"
-
-function gr() {
- builtin cd $(git rev-parse --show-toplevel)
-}
 
 export HISTSIZE=10000
 export SAVEHIST=10000
 export HISTFILE="$HOME/.history"
 setopt hist_ignore_all_dups
 setopt hist_reduce_blanks
+setopt hist_ignore_space
 setopt share_history
 setopt append_history
 
@@ -59,12 +57,10 @@ zle -N edit-command-line
 bindkey '^xe' edit-command-line
 
 # command-t like functionality in terminal with selecta
-bindkey -s "^P" "vim \$\(ag --nogroup --nocolor --column -l . 2>/dev/null | selecta\)\n"
+bindkey -s "^P" " vim \$\(ag --nogroup --nocolor --column -l . 2>/dev/null | selecta\)\n"
 
 stty ixany
 stty ixoff -ixon
 
-export SHELL="/usr/local/bin/zsh"
 # Rbenv
-export PATH="$PATH:$HOME/.rbenv/bin"
 if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
