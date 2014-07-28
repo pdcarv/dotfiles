@@ -84,7 +84,7 @@ if has("gui_running")
     set guioptions-=T
     set guioptions-=r
     set guioptions-=L
-    set guifont=Source\ Code\ Pro:h14
+    set guifont=Monaco:h14
     set lines=80 columns=100
 endif
 
@@ -120,7 +120,7 @@ inoremap <esc> <nop>
 inoremap jk <esc>
 
 " Run specs on current file with zeus
-nnoremap <leader>zs :!zeus test --format progress % %<cr>
+nnoremap <leader>zs :Dispatch zeus test --format progress %<cr>
 
 " Run spec on current file
 nnoremap <leader>s :!bundle exec rake -I. test TEST="%" %<cr>
@@ -169,11 +169,18 @@ let g:CommandTMaxHeight=10
 
 noremap <F5> :CommandTFlush<cr>
 
-" Open git unstaged files, great to resume work
-function! OpenModified()
-  let status = system("git status --porcelain | sed -ne 's/^ M//p'")
-  let files = join(split(status, "\n"), " ")
+function! GitCommand(command)
+  let result = system(a:command)
+  if empty(result)
+    echom "No files to edit."
+    return
+  endif
+  let files  = join(split(result, "\n"), " ")
   exe "args" . expand(files)
 endfunction
-command! OpenModified :call OpenModified()
+
+" Open git unstaged files, great to resume work
+command! GitModified  :call GitCommand("git status --porcelain | sed -ne 's/^ M//p'")
+" Open git conflict files to scroll through in buffer list
+command! GitConflict  :call GitCommand("git diff --name-only --diff-filter=U")
 
