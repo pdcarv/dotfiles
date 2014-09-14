@@ -1,18 +1,6 @@
-[submodule "vim/bundle/commentary"]
-	path = vim/bundle/commentary
-	url = git://github.com/tpope/vim-commentary.git
-[submodule "vim/bundle/fugitive"]
-	path = vim/bundle/fugitive
-	url = git://github.com/tpope/vim-fugitive.git
 [submodule "vim/bundle/command-t"]
 	path = vim/bundle/command-t
 	url = git://git.wincent.com/command-t.git
-[submodule "vim/bundle/ag"]
-	path = vim/bundle/ag
-	url = git://github.com/rking/ag.vim.git
-[submodule "vim/bundle/dispatch"]
-	path = vim/bundle/dispatch
-	url = git://github.com/tpope/vim-dispatch.git
 [submodule "vim/bundle/vim-coffee-script"]
 	path = vim/bundle/vim-coffee-script
 	url = https://github.com/kchmck/vim-coffee-script.git

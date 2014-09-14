@@ -3,10 +3,22 @@
 "
 " We ain't got no time for vi
 set nocompatible
+filetype off
 
-execute pathogen#infect()
-syntax on
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+
+Bundle "gmarik/Vundle.vim"
+Bundle "wincent/command-t"
+Bundle "tpope/vim-dispatch"
+Bundle "tpope/vim-commentary"
+Bundle "tpope/vim-fugitive"
+Bundle "kchmck/vim-coffee-script"
+Bundle "rking/ag.vim"
+
+call vundle#end()
 filetype plugin indent on
+syntax on
 
 " Uncategorized config
 set number                      " Show line numbers
@@ -176,7 +188,7 @@ function! GitCommand(command)
     return
   endif
   let files  = join(split(result, "\n"), " ")
-  exe "args" . expand(files)
+  exe "args " . expand(files)
 endfunction
 
 " Open git unstaged files, great to resume work
