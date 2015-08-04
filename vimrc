@@ -15,6 +15,8 @@ Bundle "tpope/vim-commentary"
 Bundle "tpope/vim-fugitive"
 Bundle "kchmck/vim-coffee-script"
 Bundle "rking/ag.vim"
+Bundle "fatih/vim-go"
+Bundle 'rizzatti/dash.vim'
 
 call vundle#end()
 filetype plugin indent on
@@ -84,7 +86,7 @@ set ttyfast
 
 " Pimp it!
 colorscheme base16-default
-set background=light
+set background=dark
 
 " Use The Silver Searcher instead of grep
 if executable('ag')
@@ -98,6 +100,19 @@ if has("gui_running")
     set guioptions-=L
     set guifont=Monaco:h14
     set lines=80 columns=100
+
+    " Switch to tabs
+    noremap <D-1> :tabn 1<CR>
+    noremap <D-2> :tabn 2<CR>
+    noremap <D-3> :tabn 3<CR>
+    noremap <D-4> :tabn 4<CR>
+    noremap <D-5> :tabn 5<CR>
+    noremap <D-6> :tabn 6<CR>
+    noremap <D-7> :tabn 7<CR>
+    noremap <D-8> :tabn 8<CR>
+    noremap <D-9> :tabn 9<CR>
+    " Command-0 goes to the last tab
+    noremap <D-0> :tablast<CR>
 endif
 
 " Jumps to the last known position in a file after opening it except
@@ -131,14 +146,14 @@ nnoremap <C-l> <C-w><C-l>
 inoremap <esc> <nop>
 inoremap jk <esc>
 
-" Run specs on current file with zeus
-nnoremap <leader>zs :Dispatch zeus test --format progress %<cr>
+" Run specs on current file with zeus and dispatch
+nnoremap <leader>ds :Dispatch bundle exec rspec --format progress %<cr>
 
 " Run spec on current file
-nnoremap <leader>s :!bundle exec rake -I. test TEST="%" %<cr>
+nnoremap <leader>s :!bundle exec rspec -I. -b --no-color %<cr>
 
-" Run rspec
-nnoremap <leader>rs :Dispatch bundle exec rspec --format progress %<cr>
+" Run test under zeus
+nnoremap <leader>zs :!zeus test --no-color --format progress %<cr>
 
 " Don't think twice when in need of some vimness
 nnoremap <leader>ev :vsplit $MYVIMRC<cr>
@@ -156,7 +171,7 @@ function! GrepIn(type)
 
     silent execute "Ag! " . shellescape(@@) . " ."
 endfunction
-vnoremap <leader>vg :<c-u>call GrepIn(visualmode())<cr>
+vnoremap <leader>gv :<c-u>call GrepIn(visualmode())<cr>
 nnoremap <leader>g :silent exe "Ag! " . shellescape(expand("<cWORD>")) . "."<cr>:copen<cr>
 
 " Automatically spell check certain file types
@@ -195,4 +210,6 @@ endfunction
 command! GitModified  :call GitCommand("git status --porcelain | sed -ne 's/^ M//p'")
 " Open git conflict files to scroll through in buffer list
 command! GitConflict  :call GitCommand("git diff --name-only --diff-filter=U")
+
+command! FormatJSON %!python -m json.tool
 

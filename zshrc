@@ -31,7 +31,7 @@ source $ZSH/history.zsh
 source $ZSH/functions.zsh
 
 export GOPATH=$HOME/code/go
-export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
+export PATH=$PATH:/usr/local/bin:/usr/local/sbin
 export PATH=$PATH:$HOME/scripts
 export PATH=$PATH:$HOME/bin
 export PATH=/usr/local/heroku/bin:$PATH
