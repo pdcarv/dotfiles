@@ -3,3 +3,5 @@ log/**
 /images/
 /vendor/
 *tags*
+/yardoc/
+/yard/
