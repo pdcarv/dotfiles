@@ -5,18 +5,19 @@
 set nocompatible
 filetype off
 
+set rtp+=~/.fzf
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
 Bundle "gmarik/Vundle.vim"
-Bundle "wincent/command-t"
 Bundle "tpope/vim-dispatch"
 Bundle "tpope/vim-commentary"
 Bundle "tpope/vim-fugitive"
 Bundle "kchmck/vim-coffee-script"
 Bundle "rking/ag.vim"
 Bundle "fatih/vim-go"
-Bundle 'rizzatti/dash.vim'
+Bundle "rizzatti/dash.vim"
+Bundle "altercation/vim-colors-solarized"
 
 call vundle#end()
 filetype plugin indent on
@@ -28,6 +29,7 @@ set numberwidth=5
 set laststatus=2
 set history=10000
 set backspace=indent,eol,start
+set noeol
 set hidden                      " Buffers do not need to be in a viewport
 set backspace=2
 let mapleader=","
@@ -83,6 +85,7 @@ set wildmode=list:longest
 " Fix slow O inserts
 set timeout timeoutlen=1000 ttimeoutlen=100
 set ttyfast
+set shell=/usr/local/bin/zsh
 
 " Pimp it!
 colorscheme base16-default
@@ -150,7 +153,7 @@ inoremap jk <esc>
 nnoremap <leader>ds :Dispatch bundle exec rspec --format progress %<cr>
 
 " Run spec on current file
-nnoremap <leader>s :!bundle exec rspec -I. -b --no-color %<cr>
+nnoremap <leader>sa :!bundle exec rspec -I. -b --no-color %<cr>
 
 " Run test under zeus
 nnoremap <leader>zs :!zeus test --no-color --format progress %<cr>
@@ -191,10 +194,9 @@ function! CleverTab()
 endfunction
 inoremap <Tab> <C-R>=CleverTab()<CR>
 
-" limit command-t height to ten lines
-let g:CommandTMaxHeight=10
-
-noremap <F5> :CommandTFlush<cr>
+nnoremap <silent> <Leader><Leader> :FZF -m<CR>
+nnoremap <silent> <Leader>s :call fzf#run({ 'tmux_height': winheight('.') / 2, 'sink': 'botright split' })<CR>
+nnoremap <silent> <Leader>v :call fzf#run({ 'tmux_width': winwidth('.') / 2, 'sink': 'vertical botright split' })<CR>
 
 function! GitCommand(command)
   let result = system(a:command)
@@ -211,5 +213,5 @@ command! GitModified  :call GitCommand("git status --porcelain | sed -ne 's/^ M/
 " Open git conflict files to scroll through in buffer list
 command! GitConflict  :call GitCommand("git diff --name-only --diff-filter=U")
 
+" Correctly ident a JSON file
 command! FormatJSON %!python -m json.tool
-
