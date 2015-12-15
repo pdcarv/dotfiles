@@ -1,4 +1,6 @@
-export HISTFILE="$HOME/.history"
+if [ -z $HISTFILE ]; then
+  export HISTFILE="$HOME/.history"
+fi
 
 export HISTSIZE=10000
 export SAVEHIST=10000
