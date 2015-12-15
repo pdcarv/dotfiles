@@ -18,6 +18,7 @@ Bundle "rking/ag.vim"
 Bundle "fatih/vim-go"
 Bundle "rizzatti/dash.vim"
 Bundle "altercation/vim-colors-solarized"
+Bundle "derekwyatt/vim-scala"
 
 call vundle#end()
 filetype plugin indent on
@@ -144,10 +145,6 @@ nnoremap <C-j> <C-w><C-j>
 nnoremap <C-k> <C-w><C-k>
 nnoremap <C-h> <C-w><C-h>
 nnoremap <C-l> <C-w><C-l>
-
-" Reaching is esc is complicated
-inoremap <esc> <nop>
-inoremap jk <esc>
 
 " Run specs on current file with zeus and dispatch
 nnoremap <leader>ds :Dispatch bundle exec rspec --format progress %<cr>
