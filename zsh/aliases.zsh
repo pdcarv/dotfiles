@@ -11,4 +11,4 @@ alias la="ls -lGA"
 
 # Rails
 alias z="zeus $*"
-alias b="bundle"
+alias be="bundle exec"
