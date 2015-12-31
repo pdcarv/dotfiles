@@ -3,26 +3,43 @@
 "
 " We ain't got no time for vi
 set nocompatible
-filetype off
 
-set rtp+=~/.fzf
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
+call plug#begin('~/.vim/plugged')
 
-Bundle "gmarik/Vundle.vim"
-Bundle "tpope/vim-dispatch"
-Bundle "tpope/vim-commentary"
-Bundle "tpope/vim-fugitive"
-Bundle "kchmck/vim-coffee-script"
-Bundle "rking/ag.vim"
-Bundle "fatih/vim-go"
-Bundle "rizzatti/dash.vim"
-Bundle "altercation/vim-colors-solarized"
-Bundle "derekwyatt/vim-scala"
+Plug 'tpope/vim-dispatch'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-fugitive'
+Plug 'kchmck/vim-coffee-script'
+Plug 'rking/ag.vim'
+Plug 'fatih/vim-go'
+Plug 'rizzatti/dash.vim'
+Plug 'altercation/vim-colors-solarized'
+Plug 'derekwyatt/vim-scala'
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'plasticboy/vim-markdown'
+Plug 'honza/dockerfile.vim'
+Plug 'justinmk/vim-gtfo'
 
-call vundle#end()
+if v:version >= 703
+  Plug 'vim-ruby/vim-ruby'
+  Plug 'mhinz/vim-signify'
+  Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle'      }
+endif
+
+if has("unix")
+  let s:uname = system("uname")
+  if s:uname == "Darwin\n"
+    Plug 'rizzatti/dash.vim',  { 'on': 'Dash' }
+  endif
+endif
+
+call plug#end()
+
 filetype plugin indent on
 syntax on
+
+" Tell vim gtfo we're using iterm
+let g:gtfo#terminals = { 'mac' : 'iterm' }
 
 " Uncategorized config
 set number                      " Show line numbers
@@ -69,6 +86,12 @@ set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
 " Exuberant ctags
 set tags=./tags,tags
 
+" 80 columns goodness
+set textwidth=0
+if exists('&colorcolumn')
+  set colorcolumn=80
+endif
+
 " Give us autocomplete
 set wildmenu
 set wildignore+=.git,.svn
@@ -89,34 +112,12 @@ set ttyfast
 set shell=/usr/local/bin/zsh
 
 " Pimp it!
-colorscheme base16-default
+colorscheme base16-grayscale
 set background=dark
 
 " Use The Silver Searcher instead of grep
 if executable('ag')
   set grepprg=ag\ --nogroup\ --nocolor\ --column
-endif
-
-if has("gui_running")
-    "macvim stuff
-    set guioptions-=T
-    set guioptions-=r
-    set guioptions-=L
-    set guifont=Monaco:h14
-    set lines=80 columns=100
-
-    " Switch to tabs
-    noremap <D-1> :tabn 1<CR>
-    noremap <D-2> :tabn 2<CR>
-    noremap <D-3> :tabn 3<CR>
-    noremap <D-4> :tabn 4<CR>
-    noremap <D-5> :tabn 5<CR>
-    noremap <D-6> :tabn 6<CR>
-    noremap <D-7> :tabn 7<CR>
-    noremap <D-8> :tabn 8<CR>
-    noremap <D-9> :tabn 9<CR>
-    " Command-0 goes to the last tab
-    noremap <D-0> :tablast<CR>
 endif
 
 " Jumps to the last known position in a file after opening it except
@@ -191,9 +192,13 @@ function! CleverTab()
 endfunction
 inoremap <Tab> <C-R>=CleverTab()<CR>
 
-nnoremap <silent> <Leader><Leader> :FZF -m<CR>
-nnoremap <silent> <Leader>s :call fzf#run({ 'tmux_height': winheight('.') / 2, 'sink': 'botright split' })<CR>
-nnoremap <silent> <Leader>v :call fzf#run({ 'tmux_width': winwidth('.') / 2, 'sink': 'vertical botright split' })<CR>
+" FZF
+let g:fzf_action = {
+  \ 'ctrl-t': 'tab split',
+  \ 'ctrl-x': 'split',
+  \ 'ctrl-v': 'vsplit' }
+let g:fzf_layout = { 'down': '~40%' }
+nnoremap <silent><Leader><Leader> :FZF -m<cr>
 
 function! GitCommand(command)
   let result = system(a:command)
