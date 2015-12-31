@@ -36,9 +36,6 @@ export PATH=$PATH:$GOPATH/bin
 export PATH=$PATH:$HOME/.rbenv/bin
 export NODE_PATH=$NODE_PATH:/usr/local/lib/node_modules
 
-# command-t like functionality in terminal with selecta
-bindkey -s "^P" " vim \$\(ag --nogroup --nocolor --column -l . 2>/dev/null | selecta\)\n"
-
 stty ixany
 stty ixoff -ixon
 
