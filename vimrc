@@ -112,7 +112,7 @@ set ttyfast
 set shell=/usr/local/bin/zsh
 
 " Pimp it!
-colorscheme base16-grayscale
+colorscheme grb256
 set background=dark
 
 " Use The Silver Searcher instead of grep
