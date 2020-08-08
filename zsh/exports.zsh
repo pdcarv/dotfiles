@@ -5,7 +5,6 @@ export FZF_DEFAULT_COMMAND='ag -g ""'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
 # PATHS
-export ZSH=$HOME/.zsh
 export PATH=$PATH:/usr/local/bin:/usr/local/sbin
 export PATH=$PATH:$HOME/scripts
 export PATH=$PATH:$HOME/bin
