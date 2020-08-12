@@ -23,3 +23,4 @@ Vagrantfile
 cookbooks/
 app/public/assets
 .netrwhist
+vim/plugged/*
