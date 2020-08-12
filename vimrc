@@ -9,7 +9,6 @@ call plug#begin('~/.vim/plugged')
 Plug 'tpope/vim-dispatch'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-fugitive'
-Plug 'kchmck/vim-coffee-script'
 Plug 'rking/ag.vim'
 Plug 'fatih/vim-go'
 Plug 'rizzatti/dash.vim'
