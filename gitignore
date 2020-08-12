@@ -22,3 +22,4 @@ Cheffile.lock
 Vagrantfile
 cookbooks/
 app/public/assets
+.netrwhist

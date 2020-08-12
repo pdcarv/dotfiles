@@ -12,3 +12,6 @@ alias la="ls -lGA"
 # Rails
 alias zs="zeus $*"
 alias be="bundle exec"
+alias python=/usr/local/bin/python3
+alias pip=/usr/local/bin/pip3
+
