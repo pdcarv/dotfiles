@@ -1,3 +1,12 @@
+# Vim
+vim/plugged/
+vim/undodir/
+vim/swap/
+vim/backup/
+vim/.netrwhist
+vim/view/
+vim/autoload/plug.vim.old
+
 # OS generated files
 .DS_Store
 .DS_Store?
@@ -5,88 +14,31 @@
 .Spotlight-V100
 .Trashes
 .Trash
-ehthumbs.db
-Thumbs.db
 
-# Editor and IDE files
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
-.vim/plugged/
-.vim/undodir/
-.vim/swap/
-.vim/backup/
-.vim/.netrwhist
-.vim/view/
+# Zsh
+zsh/cache/
+
+# Tags
 tags
 ctags
 
-# Ruby/Rails specific
+# Ruby
 .bundle/
 .ruby-version
 .rvmrc
 .ruby-gemset
 Gemfile.local
 Gemfile.local.lock
-zeus.json
-custom_plan.rb
+
+# Temp and local files
+*.orig
+devenv.sh
 dump.rdb
-Guardfile
+*.local
 
-# Node.js
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.npm
-.yarn-integrity
-
-# Python
-__pycache__/
-*.py[cod]
-.env
-.venv
-venv/
-ENV/
-
-# Infrastructure and DevOps
-.vagrant/
+# Infrastructure
 docker/
-Vagrantfile
+.vagrant/
 Cheffile
 Cheffile.lock
-
-# Build and Compile
-*.log
-*.orig
-*.o
-*.obj
-*.exe
-*.dll
-*.so
-*.dylib
-
-# Temporary files
-tmp/
-temp/
-.temp/
-.tmp/
-*.tmp
-*.temp
-
-# Cache directories
-.cache/
-zsh/cache/*
-
-# Local environment
-.env
-.env.local
-*.local
-devenv.sh
-
-# Logs and databases
-*.log
-*.sql
-*.sqlite
+Vagrantfile
