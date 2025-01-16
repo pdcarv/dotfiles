@@ -1,0 +1,26 @@
+[user]
+    name = ${GIT_AUTHOR_NAME}
+    email = ${GIT_AUTHOR_EMAIL}
+[alias]
+    ci = commit -v
+    amend = commit --amend
+    co = checkout
+    st = status -s
+    br = branch -v
+    rt = remote -v
+    df = diff
+    dc = diff --cached
+    lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --all
+    churn = "!f() { git log --all -M -C --name-only --format='format:' \"$@\" | sort | grep -v '^$' | uniq -c | sort | awk 'BEGIN {print \"count\tfile\"} {print $1 \"\t\" $2}' | sort -g; }; f"
+    conflicted = "diff --name-only --diff-filter=U"
+    unstage = reset HEAD
+    uncommit = reset --soft 'HEAD^'
+[color]
+    ui = auto
+[push]
+    default = simple
+[core]
+    excludesfile = ~/.gitignore_global
+    editor = vim
+[merge]
+    summary = true
