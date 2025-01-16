@@ -6,9 +6,6 @@ else
   compinit -C
 fi
 
-export EDITOR=vim
-set -o emacs
-
 setopt autocd
 setopt extendedglob
 setopt correct correct_all
