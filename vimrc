@@ -1,30 +1,38 @@
-" Extracted from multiple dusty files over the course of eons
-" and brought together in the fires of mordor
-"
-" We ain't got no time for vi
+" Modern vim setup - no vi compatibility
 set nocompatible
 
+" Plugin Management with vim-plug
 call plug#begin('~/.vim/plugged')
 
+" Core functionality improvements
 Plug 'tpope/vim-dispatch'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-fugitive'
-Plug 'rking/ag.vim'
+Plug 'tpope/vim-surround'         " Easy quotes/brackets manipulation
+Plug 'neoclide/coc.nvim', {'branch': 'release'}  " Completion and LSP support
+Plug 'machakann/vim-highlightedyank'  " Highlight yanked text
+Plug 'mhinz/vim-startify'            " Better start screen
+Plug 'preservim/tagbar'              " Code structure viewer
+
+" Language support and syntax
 Plug 'fatih/vim-go'
-Plug 'rizzatti/dash.vim'
-Plug 'altercation/vim-colors-solarized'
+Plug 'vim-ruby/vim-ruby'
 Plug 'derekwyatt/vim-scala'
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'plasticboy/vim-markdown'
 Plug 'honza/dockerfile.vim'
-Plug 'justinmk/vim-gtfo'
 
-if v:version >= 703
-  Plug 'vim-ruby/vim-ruby'
-  Plug 'mhinz/vim-signify'
-  Plug 'majutsushi/tagbar', { 'on': 'TagbarToggle'      }
-endif
+" Navigation and search
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf.vim'          " FZF vim integration
+Plug 'preservim/nerdtree'        " File explorer
 
+" Git integration
+Plug 'airblade/vim-gitgutter'    " Git changes in gutter
+
+" Color schemes
+Plug 'morhetz/gruvbox'
+
+" macOS specific
 if has("unix")
   let s:uname = system("uname")
   if s:uname == "Darwin\n"
@@ -34,42 +42,62 @@ endif
 
 call plug#end()
 
-filetype plugin indent on
+" Basic Settings
 syntax on
+filetype plugin indent on
 
-" Tell vim gtfo we're using iterm
-let g:gtfo#terminals = { 'mac' : 'iterm' }
+" Modern defaults
+set mouse=a                   " Enable mouse in all modes
+set clipboard=unnamed         " Use system clipboard
+set updatetime=300           " Faster update time
+set timeoutlen=500          " Faster key sequence completion
+set lazyredraw              " Don't redraw while executing macros
+set shortmess+=c           " Don't pass messages to ins-completion-menu
+set hidden                 " Allow hidden buffers
+set encoding=utf-8        " Use UTF-8 encoding
+set fileencoding=utf-8    " Use UTF-8 for written files
+set scrolloff=8           " Keep 8 lines above/below cursor
+set sidescrolloff=8       " Keep 8 characters left/right of cursor
+set pumheight=10         " Limit popup menu height
+set noshowmode           " Don't show mode (status line handles it)
 
-" Uncategorized config
-set number                      " Show line numbers
+" Split behavior
+set splitbelow             " Open new splits below
+set splitright            " Open new splits right
+set signcolumn=yes        " Always show signcolumn
+
+" File handling
+set noswapfile
+set nobackup
+set nowritebackup
+if !isdirectory($HOME."/.vim/undodir")
+    call mkdir($HOME."/.vim/undodir", "p")
+endif
+set undofile
+set undodir=~/.vim/undodir
+
+" Interface
+set number
 set numberwidth=5
 set laststatus=2
-set history=10000
-set backspace=indent,eol,start
-set noeol
-set hidden                      " Buffers do not need to be in a viewport
-set backspace=2
-let mapleader=","
-set pastetoggle=§               " Set paste on and off with special key
-set autoread                    " When file changes -> auto reload buffer
-set list listchars=tab:»·,trail:·
-set nofoldenable
-set ruler
 set cursorline
 set showmatch
 set showcmd
-set switchbuf=useopen
-set title
+set cmdheight=2
+set list
+set listchars=tab:»·,trail:·,extends:>,precedes:<,nbsp:+
+set nofoldenable
+set ruler
 
-" Searches
+" Search settings
 set hlsearch
-noremap <cr> :nohlsearch<cr>
+set incsearch             " Incremental search
+set ignorecase
+set smartcase
+set path+=**             " Search down into subfolders
+noremap <CR> :nohlsearch<CR>
 
-" No swap
-set noswapfile
-set nobackup
-
-" Indenting options
+" Indentation
 set autoindent
 set smartindent
 set smarttab
@@ -78,141 +106,146 @@ set tabstop=2
 set shiftwidth=2
 set softtabstop=2
 
-" Status line
-set cmdheight=2
+" Status line configuration
 set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
 
-" Exuberant ctags
-set tags=./tags,tags
-
-" 80 columns goodness
-set textwidth=0
-if exists('&colorcolumn')
-  set colorcolumn=80
-endif
-
-" Give us autocomplete
+" Completion
 set wildmenu
-set wildignore+=.git,.svn
-set wildignore+=.DS_Store
-set wildignore+=*/tmp/*
-set wildignore+=*.so,*.swp
-set wildignore+=*.zip,*.rar
-set wildignore+=*.png,*.jpg
-set wildignore+=*.log
+set wildmode=longest,full
+set wildignore+=.git,.svn,.DS_Store
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip
+set wildignore+=*.rar,*.png,*.jpg,*.log
 set wildignore+=*.o,*~,*.pyc
 
-" Complete to longest string, like zsh
-set wildmode=list:longest
-
-" Fix slow O inserts
-set timeout timeoutlen=1000 ttimeoutlen=100
+" Performance
 set ttyfast
 set shell=/usr/local/bin/zsh
 
-" Pimp it!
-colorscheme grb256
+" Color scheme
+colorscheme gruvbox
 set background=dark
 
-" Use The Silver Searcher instead of grep
-if executable('ag')
-  set grepprg=ag\ --nogroup\ --nocolor\ --column
-endif
+" Start screen configuration
+let g:startify_lists = [
+      \ { 'type': 'files',     'header': ['   Recent Files']    },
+      \ { 'type': 'dir',       'header': ['   Current Directory '. getcwd()] },
+      \ { 'type': 'sessions',  'header': ['   Sessions']        },
+      \ { 'type': 'bookmarks', 'header': ['   Bookmarks']       },
+      \ ]
 
-" Jumps to the last known position in a file after opening it except
-" git commit messages
-autocmd BufReadPost *
-    \ if &ft != 'gitcommit' && line("'\"") > 0 && line("'\"") <= line("$") |
-    \   exe "normal g`\"" |
-    \ endif
+" CoC configuration
+let g:coc_global_extensions = [
+  \ 'coc-tsserver',
+  \ 'coc-json',
+  \ 'coc-pyright',
+  \ 'coc-rust-analyzer'
+  \ ]
 
-" you need to learn the(by) force
-nnoremap <up> <nop>
-nnoremap <down> <nop>
-nnoremap <left> <nop>
-nnoremap <right> <nop>
-inoremap <up> <nop>
-inoremap <down> <nop>
-inoremap <left> <nop>
-inoremap <right> <nop>
+" Use tab for trigger completion
+inoremap <silent><expr> <TAB>
+      \ coc#pum#visible() ? coc#pum#next(1) :
+      \ CheckBackspace() ? "\<Tab>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
 
-" Cycle through args
-nnoremap <leader>n :next<cr>
-nnoremap <leader>p :previous<cr>
-
-" Move splits with motion keys
-nnoremap <C-j> <C-w><C-j>
-nnoremap <C-k> <C-w><C-k>
-nnoremap <C-h> <C-w><C-h>
-nnoremap <C-l> <C-w><C-l>
-
-" Run specs on current file with zeus and dispatch
-nnoremap <leader>ds :Dispatch bundle exec rspec --format progress %<cr>
-
-" Run spec on current file
-nnoremap <leader>sa :!bundle exec rspec -I. -b --no-color %<cr>
-
-" Run test under zeus
-nnoremap <leader>zs :!zeus test --no-color --format progress %<cr>
-
-" Don't think twice when in need of some vimness
-nnoremap <leader>ev :vsplit $MYVIMRC<cr>
-nnoremap <leader>sv :source $MYVIMRC<cr>
-
-" Search for word under the cursor
-" Search for visual selection
-" and open in quickfix window using Ag plugin
-function! GrepIn(type)
-    if a:type ==# 'v'
-        normal! `<v`>y
-    else
-        return
-    endif
-
-    silent execute "Ag! " . shellescape(@@) . " ."
+function! CheckBackspace() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
-vnoremap <leader>gv :<c-u>call GrepIn(visualmode())<cr>
-nnoremap <leader>g :silent exe "Ag! " . shellescape(expand("<cWORD>")) . "."<cr>:copen<cr>
 
-" Automatically spell check certain file types
-autocmd FileType gitcommit setlocal spell
-autocmd BufRead,BufNewFile *.md setlocal spell
+" Use K to show documentation in preview window
+nnoremap <silent> K :call ShowDocumentation()<CR>
 
-" Resize splits automatically when the window is resized
-au VimResized * exe "normal! \<c-w>="
-
-" Tab complete when not in begining or end of line
-" Extracted and modified from: http://vim.wikia.com/wiki/Smart_mapping_for_tab_completion
-function! CleverTab()
-  if strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
-    return "\<Tab>"
+function! ShowDocumentation()
+  if CocAction('hasProvider', 'hover')
+    call CocActionAsync('doHover')
   else
-    return "\<C-N>"
+    call feedkeys('K', 'in')
+  endif
 endfunction
-inoremap <Tab> <C-R>=CleverTab()<CR>
 
-" FZF
+" GoTo code navigation
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
+" FZF Configuration
 let g:fzf_action = {
   \ 'ctrl-t': 'tab split',
   \ 'ctrl-x': 'split',
   \ 'ctrl-v': 'vsplit' }
 let g:fzf_layout = { 'down': '~40%' }
-nnoremap <silent><Leader><Leader> :FZF -m<cr>
 
+" Key mappings
+let mapleader=","
+
+" Window navigation
+nnoremap <C-j> <C-w><C-j>
+nnoremap <C-k> <C-w><C-k>
+nnoremap <C-h> <C-w><C-h>
+nnoremap <C-l> <C-w><C-l>
+
+" Quick buffer navigation
+nnoremap <leader>bn :bnext<CR>
+nnoremap <leader>bp :bprevious<CR>
+
+" Quick tab navigation
+nnoremap <leader>tn :tabnext<CR>
+nnoremap <leader>tp :tabprevious<CR>
+
+" Toggle Tagbar
+nnoremap <F8> :TagbarToggle<CR>
+
+" Quick vimrc access
+nnoremap <leader>ev :vsplit $MYVIMRC<cr>
+nnoremap <leader>sv :source $MYVIMRC<cr>
+
+" FZF mappings
+nnoremap <leader>f :Files<CR>
+nnoremap <leader>b :Buffers<CR>
+nnoremap <leader>g :Ag<CR>
+
+" NERDTree mappings
+nnoremap <leader>n :NERDTreeToggle<CR>
+nnoremap <leader>nf :NERDTreeFind<CR>
+
+" Improved Git commands
 function! GitCommand(command)
-  let result = system(a:command)
-  if empty(result)
-    echom "No files to edit."
-    return
-  endif
-  let files  = join(split(result, "\n"), " ")
-  exe "args " . expand(files)
+    let l:output = system(a:command)
+    if v:shell_error
+        echohl ErrorMsg
+        echo "Git command failed: " . l:output
+        echohl None
+        return
+    endif
+    if empty(l:output)
+        echo "No files to edit."
+        return
+    endif
+    let l:files = split(l:output, "\n")
+    exe "args " . join(map(l:files, 'fnameescape(v:val)'), ' ')
 endfunction
 
-" Open git unstaged files, great to resume work
-command! GitModified  :call GitCommand("git status --porcelain | sed -ne 's/^ M//p'")
-" Open git conflict files to scroll through in buffer list
-command! GitConflict  :call GitCommand("git diff --name-only --diff-filter=U")
+command! GitModified :call GitCommand("git status --porcelain | sed -ne 's/^ M//p'")
+command! GitConflict :call GitCommand("git diff --name-only --diff-filter=U")
 
-" Correctly ident a JSON file
+" Auto commands
+augroup vimrc_autogroup
+    autocmd!
+    " Spell checking
+    autocmd FileType gitcommit setlocal spell
+    autocmd BufRead,BufNewFile *.md setlocal spell
+
+    " Return to last edit position
+    autocmd BufReadPost *
+        \ if &ft != 'gitcommit' && line("'\"") > 0 && line("'\"") <= line("$") |
+        \   exe "normal g`\"" |
+        \ endif
+
+    " Resize splits on window resize
+    autocmd VimResized * exe "normal! \<c-w>="
+augroup END
+
+" Format JSON command
 command! FormatJSON %!python -m json.tool

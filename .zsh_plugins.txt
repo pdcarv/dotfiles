@@ -1,0 +1,5 @@
+denysdovhan/spaceship-prompt
+zsh-users/zsh-completions
+zsh-users/zsh-autosuggestions
+# Any other plugins...
+zsh-users/zsh-syntax-highlighting
