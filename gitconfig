@@ -1,6 +1,7 @@
 [user]
     name = ${GIT_AUTHOR_NAME}
     email = ${GIT_AUTHOR_EMAIL}
+
 [alias]
     ci = commit -v
     amend = commit --amend
@@ -15,12 +16,74 @@
     conflicted = "diff --name-only --diff-filter=U"
     unstage = reset HEAD
     uncommit = reset --soft 'HEAD^'
+    
+    lgs = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --all -n 10
+    brd = branch -d
+    brD = branch -D
+
+    sl = stash list
+    ss = stash save
+    sp = stash pop
+    sa = stash apply
+
+    gotest = "!gt() { go test ./... ${1:-.}; }; gt"
+    gobuild = "!gb() { go build ./...; }; gb"
+    review = diff --stat -p -w --patience
+    files = diff --name-only
+    save = "!f() { git add -A && git commit -m \"$@\" && git push; }; f"
+    undo-commit = reset --soft HEAD^
+    undo-add = reset HEAD
+    changed = show --name-only --oneline HEAD
+    reb = "!r() { git rebase -i HEAD~$1; }; r"
+    find = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short --grep=$1; }; f"
+    incoming = "!f() { git fetch && git log ..origin/$(git rev-parse --abbrev-ref HEAD); }; f"
+    outgoing = "!f() { git fetch && git log origin/$(git rev-parse --abbrev-ref HEAD)..; }; f"
+
 [color]
     ui = auto
+
 [push]
-    default = simple
+    default = current
+    autoSetupRemote = true
+
 [core]
     excludesfile = ~/.gitignore_global
     editor = vim
+    pager = delta
+    autocrlf = input
+    whitespace = trailing-space,space-before-tab
+
 [merge]
     summary = true
+    conflictstyle = zdiff3
+    tool = vimdiff
+    ff = only
+
+[mergetool]
+    keepBackup = false
+
+[diff]
+    algorithm = histogram
+    colorMoved = default
+    compactionHeuristic = true
+
+[rebase]
+    autosquash = true
+    autostash = true
+    updateRefs = true
+
+[init]
+    defaultBranch = main
+
+[fetch]
+    prune = true
+
+[rerere]
+    enabled = true
+
+[branch]
+    sort = -committerdate
+
+[pull]
+    rebase = true
+    ff = only
