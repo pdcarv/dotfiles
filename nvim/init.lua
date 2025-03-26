@@ -1,4 +1,4 @@
--- Neovim configuration with Go development focus
+-- Neovim configuration with Go development focus and enhanced search capabilities
 
 -----------------------------------------------------------
 -- Initial Setup
@@ -106,35 +106,92 @@ require('packer').startup(function(use)
     'nvim-telescope/telescope.nvim',
     requires = {
       'nvim-lua/plenary.nvim',
-      -- Only add the fzf extension if make is available
-      { 'nvim-telescope/telescope-fzf-native.nvim', 
-        run = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build',
-        cond = vim.fn.executable('cmake') == 1
-      }
+      -- Use simpler installation for fzf-native
+      { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
     },
     config = function()
       require('telescope').setup({
         defaults = {
+          -- Use ripgrep for faster text searches
+          vimgrep_arguments = {
+            'rg',
+            '--color=never',
+            '--no-heading',
+            '--with-filename',
+            '--line-number',
+            '--column',
+            '--smart-case',
+            '--hidden',      -- Search hidden files
+            '--glob=!.git/', -- Exclude .git directory
+          },
           path_display = { truncate = 3 },
           layout_config = {
-            horizontal = { width = 0.9, height = 0.9 }
+            horizontal = { width = 0.95, height = 0.95, preview_width = 0.6 }
           },
           mappings = {
             i = {
               ["<C-j>"] = "move_selection_next",
               ["<C-k>"] = "move_selection_previous",
+              ["<C-u>"] = false, -- Clear prompt
+              ["<C-d>"] = require("telescope.actions").delete_buffer,
             },
           },
-          file_ignore_patterns = { "node_modules", ".git/", "vendor/" },
+          file_ignore_patterns = {
+            "node_modules",
+            ".git/",
+            "vendor/",
+            "%.lock$",
+            "%.sum$",
+          },
+          -- Performance optimizations
+          cache_picker = {
+            num_pickers = 10, -- Cache results of previous pickers
+          },
+          prompt_prefix = "   ",
+          selection_caret = "  ",
+          entry_prefix = "  ",
+          initial_mode = "insert",
+          selection_strategy = "reset",
+          sorting_strategy = "ascending",
+          scroll_strategy = "cycle",
+          -- For large codebases:
+          preview = {
+            treesitter = true,
+            timeout = 500, -- ms
+          },
         },
         pickers = {
           find_files = {
             hidden = true
           },
         },
+        extensions = {
+          fzf = {
+            fuzzy = true,
+            override_generic_sorter = true,
+            override_file_sorter = true,
+            case_mode = "smart_case",
+          }
+        },
       })
-      -- Load telescope-fzf-native if available
-      pcall(function() require('telescope').load_extension('fzf') end)
+      -- Load extensions
+      require('telescope').load_extension('fzf')
+    end
+  }
+
+  -- Additional Telescope extensions
+  use {
+    'nvim-telescope/telescope-ui-select.nvim',
+    config = function()
+      require("telescope").load_extension("ui-select")
+    end
+  }
+
+  use {
+    'nvim-telescope/telescope-frecency.nvim', -- Prioritizes frequently accessed files
+    requires = { 'kkharji/sqlite.lua' },
+    config = function()
+      require("telescope").load_extension("frecency")
     end
   }
 
@@ -169,7 +226,7 @@ require('packer').startup(function(use)
 
       -- Add terminal keymaps
       function _G.set_terminal_keymaps()
-        local opts = {buffer = 0}
+        local opts = { buffer = 0 }
         vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
         vim.keymap.set('t', '<C-h>', [[<Cmd>wincmd h<CR>]], opts)
         vim.keymap.set('t', '<C-j>', [[<Cmd>wincmd j<CR>]], opts)
@@ -201,36 +258,36 @@ require('packer').startup(function(use)
         },
         on_attach = function(bufnr)
           local gs = package.loaded.gitsigns
-          
+
           -- Navigation
           vim.keymap.set('n', ']c', function()
             if vim.wo.diff then return ']c' end
             vim.schedule(function() gs.next_hunk() end)
             return '<Ignore>'
-          end, {expr=true, buffer=bufnr})
+          end, { expr = true, buffer = bufnr })
 
           vim.keymap.set('n', '[c', function()
             if vim.wo.diff then return '[c' end
             vim.schedule(function() gs.prev_hunk() end)
             return '<Ignore>'
-          end, {expr=true, buffer=bufnr})
+          end, { expr = true, buffer = bufnr })
 
           -- Actions
-          vim.keymap.set('n', '<leader>gb', gs.toggle_current_line_blame, {buffer=bufnr})
-          vim.keymap.set('n', '<leader>gd', gs.diffthis, {buffer=bufnr})
-          vim.keymap.set('n', '<leader>gD', function() gs.diffthis('~') end, {buffer=bufnr})
-          vim.keymap.set('n', '<leader>gs', gs.stage_hunk, {buffer=bufnr})
-          vim.keymap.set('n', '<leader>gr', gs.reset_hunk, {buffer=bufnr})
-          vim.keymap.set('n', '<leader>gu', gs.undo_stage_hunk, {buffer=bufnr})
-          vim.keymap.set('n', '<leader>gp', gs.preview_hunk, {buffer=bufnr})
+          vim.keymap.set('n', '<leader>gb', gs.toggle_current_line_blame, { buffer = bufnr })
+          vim.keymap.set('n', '<leader>gd', gs.diffthis, { buffer = bufnr })
+          vim.keymap.set('n', '<leader>gD', function() gs.diffthis('~') end, { buffer = bufnr })
+          vim.keymap.set('n', '<leader>gs', gs.stage_hunk, { buffer = bufnr })
+          vim.keymap.set('n', '<leader>gr', gs.reset_hunk, { buffer = bufnr })
+          vim.keymap.set('n', '<leader>gu', gs.undo_stage_hunk, { buffer = bufnr })
+          vim.keymap.set('n', '<leader>gp', gs.preview_hunk, { buffer = bufnr })
         end
       })
     end
   }
 
   -- UI and theme
-  use { 
-    'ellisonleao/gruvbox.nvim', 
+  use {
+    'ellisonleao/gruvbox.nvim',
     priority = 1000,
     config = function()
       local has_gruvbox, gruvbox = pcall(require, "gruvbox")
@@ -250,7 +307,7 @@ require('packer').startup(function(use)
       pcall(function() vim.cmd("colorscheme gruvbox") end)
     end
   }
-  
+
   use {
     'nvim-lualine/lualine.nvim',
     config = function()
@@ -264,12 +321,12 @@ require('packer').startup(function(use)
             globalstatus = true,
           },
           sections = {
-            lualine_a = {'mode'},
-            lualine_b = {'branch', 'diff', 'diagnostics'},
-            lualine_c = {'filename'},
-            lualine_x = {'encoding', 'fileformat', 'filetype'},
-            lualine_y = {'progress'},
-            lualine_z = {'location'}
+            lualine_a = { 'mode' },
+            lualine_b = { 'branch', 'diff', 'diagnostics' },
+            lualine_c = { 'filename' },
+            lualine_x = { 'encoding', 'fileformat', 'filetype' },
+            lualine_y = { 'progress' },
+            lualine_z = { 'location' }
           },
         })
       end
@@ -292,13 +349,13 @@ require('packer').startup(function(use)
           auto_close = true,
           use_diagnostic_signs = true
         })
-        
+
         -- Trouble keymaps
-        vim.keymap.set("n", "<leader>xx", "<cmd>TroubleToggle<cr>", {silent = true, noremap = true})
-        vim.keymap.set("n", "<leader>xd", "<cmd>TroubleToggle document_diagnostics<cr>", {silent = true, noremap = true})
-        vim.keymap.set("n", "<leader>xw", "<cmd>TroubleToggle workspace_diagnostics<cr>", {silent = true, noremap = true})
-        vim.keymap.set("n", "<leader>xl", "<cmd>TroubleToggle loclist<cr>", {silent = true, noremap = true})
-        vim.keymap.set("n", "<leader>xq", "<cmd>TroubleToggle quickfix<cr>", {silent = true, noremap = true})
+        vim.keymap.set("n", "<leader>xx", "<cmd>TroubleToggle<cr>", { silent = true, noremap = true })
+        vim.keymap.set("n", "<leader>xd", "<cmd>TroubleToggle document_diagnostics<cr>", { silent = true, noremap = true })
+        vim.keymap.set("n", "<leader>xw", "<cmd>TroubleToggle workspace_diagnostics<cr>", { silent = true, noremap = true })
+        vim.keymap.set("n", "<leader>xl", "<cmd>TroubleToggle loclist<cr>", { silent = true, noremap = true })
+        vim.keymap.set("n", "<leader>xq", "<cmd>TroubleToggle quickfix<cr>", { silent = true, noremap = true })
       end
     end
   }
@@ -324,11 +381,11 @@ require('packer').startup(function(use)
         },
         trouble = true,
         test_efm = true,
-        lsp_cfg = false, -- Set to false to avoid config conflict with our manual setup
+        lsp_cfg = false,       -- Set to false to avoid config conflict with our manual setup
         lsp_gofumpt = true,
         lsp_on_attach = false, -- Set to false to avoid config conflict with our manual setup
         dap_debug = true,
-        gopls_cmd = {'gopls'},
+        gopls_cmd = { 'gopls' },
         gopls_remote_auto = true,
         tag_options = 'json=omitempty',
         sign_priority = 100,
@@ -346,6 +403,13 @@ require('packer').startup(function(use)
       map('n', '<leader>ga', '<cmd>GoAlt!<CR>', { noremap = true })
       map('n', '<leader>gm', '<cmd>GoModTidy<CR>', { noremap = true })
       map('n', '<leader>ge', '<cmd>GoIfErr<CR>', { noremap = true })
+
+      -- Go-specific search mappings
+      map('n', '<leader>gfs', '<cmd>Telescope lsp_document_symbols<CR>', { noremap = true, desc = "Go file symbols" })
+      map('n', '<leader>gws', '<cmd>Telescope lsp_workspace_symbols<CR>',
+        { noremap = true, desc = "Go workspace symbols" })
+      map('n', '<leader>gif', '<cmd>Telescope lsp_implementations<CR>', { noremap = true, desc = "Go implementations" })
+      map('n', '<leader>grf', '<cmd>Telescope lsp_references<CR>', { noremap = true, desc = "Go references" })
     end
   }
 
@@ -365,7 +429,7 @@ require('packer').startup(function(use)
           keys = 'qwertyuiopzxcvbnmasdfghjkl',
           check_comma = true,
           highlight = 'Search',
-          highlight_grey='Comment'
+          highlight_grey = 'Comment'
         },
       })
       -- Make autopairs and completion work together
@@ -382,7 +446,7 @@ require('packer').startup(function(use)
     config = function()
       require('nvim-treesitter.configs').setup({
         ensure_installed = { 'go', 'lua', 'markdown', 'markdown_inline', 'yaml', 'json', 'sql', 'bash' },
-        highlight = { 
+        highlight = {
           enable = true,
           additional_vim_regex_highlighting = false,
         },
@@ -433,9 +497,9 @@ require('packer').startup(function(use)
       })
     end
   }
-  
+
   use 'nvim-treesitter/nvim-treesitter-textobjects'
-  
+
   -- Comment plugin
   use {
     'numToStr/Comment.nvim',
@@ -446,7 +510,7 @@ require('packer').startup(function(use)
       end
     end
   }
-  
+
   -- Indent guides
   use {
     "lukas-reineke/indent-blankline.nvim",
@@ -469,7 +533,7 @@ require('packer').startup(function(use)
       end
     end
   }
-  
+
   -- Better UI components
   use {
     "folke/which-key.nvim",
@@ -574,18 +638,18 @@ cmp.setup.cmdline(':', {
 luasnip.add_snippets("go", {
   -- Better error handling with context
   luasnip.snippet("iferr", {
-    luasnip.text_node({"if err != nil {", "\t"}),
+    luasnip.text_node({ "if err != nil {", "\t" }),
     luasnip.insert_node(1, "return fmt.Errorf(\"failed to %s: %w\", "),
     luasnip.insert_node(2, "task"),
     luasnip.text_node(", err)"),
-    luasnip.text_node({"", "}"})
+    luasnip.text_node({ "", "}" })
   }),
-  
+
   -- Regular error handling
   luasnip.snippet("errn", {
-    luasnip.text_node({"if err != nil {", "\t"}),
+    luasnip.text_node({ "if err != nil {", "\t" }),
     luasnip.insert_node(1, "return err"),
-    luasnip.text_node({"", "}"})
+    luasnip.text_node({ "", "}" })
   }),
 
   -- Function snippet with optional receiver
@@ -596,9 +660,9 @@ luasnip.add_snippets("go", {
     luasnip.insert_node(2),
     luasnip.text_node(") "),
     luasnip.insert_node(3),
-    luasnip.text_node({" {", "\t"}),
+    luasnip.text_node({ " {", "\t" }),
     luasnip.insert_node(0),
-    luasnip.text_node({"", "}"})
+    luasnip.text_node({ "", "}" })
   }),
 
   -- Method with receiver
@@ -611,9 +675,9 @@ luasnip.add_snippets("go", {
     luasnip.insert_node(3),
     luasnip.text_node(") "),
     luasnip.insert_node(4),
-    luasnip.text_node({" {", "\t"}),
+    luasnip.text_node({ " {", "\t" }),
     luasnip.insert_node(0),
-    luasnip.text_node({"", "}"})
+    luasnip.text_node({ "", "}" })
   }),
 
   -- Test function
@@ -621,38 +685,39 @@ luasnip.add_snippets("go", {
     luasnip.text_node("func Test"),
     luasnip.insert_node(1, "Name"),
     luasnip.text_node("(t *testing.T) {"),
-    luasnip.text_node({"", "\t"}),
+    luasnip.text_node({ "", "\t" }),
     luasnip.insert_node(0),
-    luasnip.text_node({"", "}"})
+    luasnip.text_node({ "", "}" })
   }),
-  
+
   -- Table test snippet
   luasnip.snippet("ttest", {
-    luasnip.text_node({"func Test", ""}),
+    luasnip.text_node({ "func Test", "" }),
     luasnip.insert_node(1, "Name"),
-    luasnip.text_node({"(t *testing.T) {", "\ttests := []struct{", "\t\tname string", "\t\t"}),
+    luasnip.text_node({ "(t *testing.T) {", "\ttests := []struct{", "\t\tname string", "\t\t" }),
     luasnip.insert_node(2, "input string"),
-    luasnip.text_node({"", "\t\t"}),
+    luasnip.text_node({ "", "\t\t" }),
     luasnip.insert_node(3, "want string"),
-    luasnip.text_node({"", "\t}{", "\t\t{", "\t\t\tname: \""}),
+    luasnip.text_node({ "", "\t}{", "\t\t{", "\t\t\tname: \"" }),
     luasnip.insert_node(4, "test case"),
-    luasnip.text_node({"\",", "\t\t\t"}),
+    luasnip.text_node({ "\",", "\t\t\t" }),
     luasnip.insert_node(5, "input: \"value\","),
-    luasnip.text_node({"", "\t\t\t"}),
+    luasnip.text_node({ "", "\t\t\t" }),
     luasnip.insert_node(6, "want: \"expected\","),
-    luasnip.text_node({"", "\t\t},", "\t}", "", "\tfor _, tt := range tests {", "\t\tt.Run(tt.name, func(t *testing.T) {", "\t\t\t"}),
+    luasnip.text_node({ "", "\t\t},", "\t}", "", "\tfor _, tt := range tests {",
+      "\t\tt.Run(tt.name, func(t *testing.T) {", "\t\t\t" }),
     luasnip.insert_node(0, "// test logic"),
-    luasnip.text_node({"", "\t\t})", "\t}", "}"}),
+    luasnip.text_node({ "", "\t\t})", "\t}", "}" }),
   }),
-  
+
   -- Benchmark function
   luasnip.snippet("bench", {
     luasnip.text_node("func Benchmark"),
     luasnip.insert_node(1, "Name"),
     luasnip.text_node("(b *testing.B) {"),
-    luasnip.text_node({"", "\tb.ResetTimer()", "\tfor i := 0; i < b.N; i++ {", "\t\t"}),
+    luasnip.text_node({ "", "\tb.ResetTimer()", "\tfor i := 0; i < b.N; i++ {", "\t\t" }),
     luasnip.insert_node(0),
-    luasnip.text_node({"", "\t}", "}"})
+    luasnip.text_node({ "", "\t}", "}" })
   }),
 })
 
@@ -696,13 +761,13 @@ local on_attach = function(client, bufnr)
   vim.keymap.set('n', '<leader>D', vim.lsp.buf.type_definition, opts)
   vim.keymap.set('n', '<leader>fs', vim.lsp.buf.document_symbol, opts)
   vim.keymap.set('n', '<leader>ff', function() vim.lsp.buf.format({ async = true }) end, opts)
-  
+
   -- Diagnostic keymaps
   vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
   vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
   vim.keymap.set('n', '<leader>dl', vim.diagnostic.setloclist, opts)
   vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, opts)
-    
+
   -- Set autoformat
   if client.server_capabilities.documentFormattingProvider then
     vim.api.nvim_create_autocmd("BufWritePre", {
@@ -718,8 +783,8 @@ end
 -- Gopls setup
 require('lspconfig').gopls.setup({
   capabilities = capabilities,
-  cmd = {"gopls"},
-  filetypes = {"go", "gomod", "gowork", "gotmpl"},
+  cmd = { "gopls" },
+  filetypes = { "go", "gomod", "gowork", "gotmpl" },
   settings = {
     gopls = {
       analyses = {
@@ -744,16 +809,16 @@ require('lspconfig').gopls.setup({
   on_attach = function(client, bufnr)
     -- Disable semantic tokens
     client.server_capabilities.semanticTokensProvider = nil
-    
+
     -- Call common on_attach
     on_attach(client, bufnr)
-    
+
     -- Go-specific import organization
     vim.api.nvim_create_autocmd("BufWritePre", {
       pattern = "*.go",
       callback = function()
         local params = vim.lsp.util.make_range_params()
-        params.context = {only = {"source.organizeImports"}}
+        params.context = { only = { "source.organizeImports" } }
         local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 3000)
         for _, res in pairs(result or {}) do
           for _, r in pairs(res.result or {}) do
@@ -779,7 +844,7 @@ require('lspconfig').lua_ls.setup({
         version = 'LuaJIT',
       },
       diagnostics = {
-        globals = {'vim'},
+        globals = { 'vim' },
       },
       workspace = {
         library = vim.api.nvim_get_runtime_file("", true),
@@ -816,14 +881,19 @@ vim.keymap.set('n', '<S-l>', ':bnext<CR>', { silent = true })
 vim.keymap.set('n', '<S-h>', ':bprevious<CR>', { silent = true })
 vim.keymap.set('n', '<leader>bd', ':bdelete<CR>', { silent = true })
 
--- Telescope mappings
-vim.keymap.set('n', '<leader>sf', '<cmd>Telescope find_files<CR>')
-vim.keymap.set('n', '<leader>sg', '<cmd>Telescope live_grep<CR>')
-vim.keymap.set('n', '<leader>sb', '<cmd>Telescope buffers<CR>')
-vim.keymap.set('n', '<leader>sh', '<cmd>Telescope help_tags<CR>')
-vim.keymap.set('n', '<leader>sr', '<cmd>Telescope lsp_references<CR>')
-vim.keymap.set('n', '<leader>sd', '<cmd>Telescope diagnostics<CR>')
-vim.keymap.set('n', '<leader>sp', '<cmd>Telescope projects<CR>')
+-- Enhanced Telescope search mappings
+vim.keymap.set('n', '<leader>sf', '<cmd>Telescope find_files hidden=true<CR>', { desc = "Find files" })
+vim.keymap.set('n', '<leader>sg', '<cmd>Telescope live_grep<CR>', { desc = "Grep in files" })
+vim.keymap.set('n', '<leader>sw', '<cmd>Telescope grep_string<CR>', { desc = "Find word under cursor" })
+vim.keymap.set('n', '<leader>sc', '<cmd>Telescope current_buffer_fuzzy_find<CR>', { desc = "Search in current buffer" })
+vim.keymap.set('n', '<leader>sb', '<cmd>Telescope buffers<CR>', { desc = "List open buffers" })
+vim.keymap.set('n', '<leader>sh', '<cmd>Telescope help_tags<CR>', { desc = "Search help tags" })
+vim.keymap.set('n', '<leader>sr', '<cmd>Telescope lsp_references<CR>', { desc = "Find references" })
+vim.keymap.set('n', '<leader>sd', '<cmd>Telescope diagnostics<CR>', { desc = "List diagnostics" })
+vim.keymap.set('n', '<leader>si', '<cmd>Telescope lsp_implementations<CR>', { desc = "Find implementations" })
+vim.keymap.set('n', '<leader>ss', '<cmd>Telescope lsp_document_symbols<CR>', { desc = "Search document symbols" })
+vim.keymap.set('n', '<leader>sS', '<cmd>Telescope lsp_workspace_symbols<CR>', { desc = "Search workspace symbols" })
+vim.keymap.set('n', '<leader>fr', '<cmd>Telescope frecency<CR>', { desc = "Recent/frequent files" })
 
 -- Better indenting
 vim.keymap.set('v', '<', '<gv')
