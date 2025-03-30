@@ -78,8 +78,8 @@ require("lazy").setup({
       require("tokyonight").setup({
         style = "night",
         on_colors = function(colors)
-          colors.blue = "#7aa2f7"  -- Slightly warmer blue
-          colors.cyan = "#7dcfff"  -- Slightly warmer cyan
+          colors.blue = "#7aa2f7" -- Slightly warmer blue
+          colors.cyan = "#7dcfff" -- Slightly warmer cyan
         end,
         on_highlights = function(highlights, colors)
           highlights.Comment = { fg = "#737aa2" }
@@ -98,7 +98,7 @@ require("lazy").setup({
       vim.cmd("colorscheme tokyonight-night")
     end
   },
-  
+
   -- macOS System Appearance Detection
   {
     "f-person/auto-dark-mode.nvim",
@@ -119,7 +119,7 @@ require("lazy").setup({
       end, 500)
     end
   },
-  
+
   -- Fast Navigation
   {
     "phaazon/hop.nvim",
@@ -131,11 +131,11 @@ require("lazy").setup({
       map('n', '<leader>j', ':HopLine<CR>', { silent = true })
     end
   },
-  
+
   -- Quick file switching
   {
     "ThePrimeagen/harpoon",
-    dependencies = {"nvim-lua/plenary.nvim"},
+    dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       local mark = require("harpoon.mark")
       local ui = require("harpoon.ui")
@@ -147,7 +147,7 @@ require("lazy").setup({
       map('n', '<C-4>', function() ui.nav_file(4) end)
     end
   },
-  
+
   -- Code Structure
   {
     "simrat39/symbols-outline.nvim",
@@ -156,7 +156,7 @@ require("lazy").setup({
         autofold_depth = 1,
         auto_preview = false,
         keymaps = {
-          close = {"<Esc>", "q"},
+          close = { "<Esc>", "q" },
           goto_location = "<CR>",
           focus_location = "o",
           toggle_preview = "K",
@@ -165,10 +165,10 @@ require("lazy").setup({
       map('n', '<leader>o', ':SymbolsOutline<CR>', { silent = true, desc = "Toggle outline" })
     end
   },
-  
+
   -- Multi-cursor
   "mg979/vim-visual-multi",
-  
+
   -- Code Peeking
   {
     "dnlhc/glance.nvim",
@@ -183,40 +183,40 @@ require("lazy").setup({
       map('n', 'gy', '<CMD>Glance type_definitions<CR>')
     end
   },
-  
+
   -- Smart Folding
   {
     "kevinhwang91/nvim-ufo",
-    dependencies = {"kevinhwang91/promise-async"},
+    dependencies = { "kevinhwang91/promise-async" },
     config = function()
       vim.o.foldcolumn = '1'
       vim.o.foldlevel = 99
       vim.o.foldlevelstart = 99
       vim.o.foldenable = true
-      
+
       require("ufo").setup({
         provider_selector = function(bufnr, filetype, buftype)
-          return {'treesitter', 'indent'}
+          return { 'treesitter', 'indent' }
         end
       })
-      
+
       local ufo = require("ufo")
       map('n', 'zR', function() ufo.openAllFolds() end)
       map('n', 'zM', function() ufo.closeAllFolds() end)
       map('n', 'zr', function() ufo.openFoldsExceptKinds() end)
       map('n', 'K', function()
-          local winid = ufo.peekFoldedLinesUnderCursor()
-          if not winid then
-              vim.lsp.buf.hover()
-          end
+        local winid = ufo.peekFoldedLinesUnderCursor()
+        if not winid then
+          vim.lsp.buf.hover()
+        end
       end)
     end
   },
-  
+
   -- Todo Comments
   {
     "folke/todo-comments.nvim",
-    dependencies = {"nvim-lua/plenary.nvim"},
+    dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       require("todo-comments").setup({
         keywords = {
@@ -228,24 +228,24 @@ require("lazy").setup({
           NOTE = { icon = " ", color = "hint", alt = { "INFO" } },
         }
       })
-      
+
       map("n", "]t", function() require("todo-comments").jump_next() end)
       map("n", "[t", function() require("todo-comments").jump_prev() end)
       map("n", "<leader>td", "<cmd>TodoTelescope<CR>", { desc = "Todo comments" })
     end
   },
-  
+
   -- Enhanced search and replace
   {
     "nvim-pack/nvim-spectre",
-    dependencies = {"nvim-lua/plenary.nvim"},
+    dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       require("spectre").setup()
-      map('n', '<leader>S', '<cmd>lua require("spectre").open()<CR>', {desc = "Search and replace"})
-      map('n', '<leader>sw', '<cmd>lua require("spectre").open_visual({select_word=true})<CR>', {desc = "Search word"})
+      map('n', '<leader>S', '<cmd>lua require("spectre").open()<CR>', { desc = "Search and replace" })
+      map('n', '<leader>sw', '<cmd>lua require("spectre").open_visual({select_word=true})<CR>', { desc = "Search word" })
     end
   },
-  
+
   -- Enhanced text objects
   {
     "echasnovski/mini.ai",
@@ -264,11 +264,11 @@ require("lazy").setup({
       })
     end
   },
-  
+
   -- File tree and navigation
   {
     "nvim-tree/nvim-tree.lua",
-    dependencies = {"nvim-tree/nvim-web-devicons"},
+    dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       require("nvim-tree").setup({
         sort_by = "case_sensitive",
@@ -289,15 +289,15 @@ require("lazy").setup({
       map('n', '<leader>pv', ':NvimTreeFindFile<CR>', { silent = true, desc = "Find current file" })
     end
   },
-  
+
   -- File searching
   {
     "nvim-telescope/telescope.nvim",
     dependencies = {
-      {"nvim-lua/plenary.nvim"},
-      {"nvim-telescope/telescope-fzf-native.nvim", build = "make"},
+      { "nvim-lua/plenary.nvim" },
+      { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
       "nvim-telescope/telescope-ui-select.nvim",
-      {"nvim-telescope/telescope-frecency.nvim", dependencies = {"kkharji/sqlite.lua"}},
+      { "nvim-telescope/telescope-frecency.nvim", dependencies = { "kkharji/sqlite.lua" } },
     },
     config = function()
       require("telescope").setup({
@@ -319,7 +319,7 @@ require("lazy").setup({
               ["<C-d>"] = "delete_buffer",
             },
           },
-          file_ignore_patterns = { 
+          file_ignore_patterns = {
             "node_modules", ".git/", "vendor/", "%.lock$", "%.sum$",
           },
           prompt_prefix = "   ",
@@ -338,12 +338,12 @@ require("lazy").setup({
           }
         },
       })
-      
+
       -- Load extensions
       pcall(function() require("telescope").load_extension('fzf') end)
       pcall(function() require("telescope").load_extension('ui-select') end)
       pcall(function() require("telescope").load_extension('frecency') end)
-      
+
       -- Telescope keymaps
       map('n', '<leader>f', '<cmd>Telescope find_files hidden=true<CR>', { desc = "Find files" })
       map('n', '<leader>r', '<cmd>Telescope frecency<CR>', { desc = "Recent files" })
@@ -360,7 +360,7 @@ require("lazy").setup({
       map('n', '<leader>gb', '<cmd>Telescope git_branches<CR>', { desc = "Git branches" })
     end
   },
-  
+
   -- Terminal
   {
     "akinsho/toggleterm.nvim",
@@ -378,10 +378,10 @@ require("lazy").setup({
         direction = 'float',
         float_opts = { border = 'curved' },
       })
-      
+
       -- Terminal keymaps
       function _G.set_terminal_keymaps()
-        local opts = {buffer = 0}
+        local opts = { buffer = 0 }
         vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
         vim.keymap.set('t', '<C-h>', [[<Cmd>wincmd h<CR>]], opts)
         vim.keymap.set('t', '<C-j>', [[<Cmd>wincmd j<CR>]], opts)
@@ -390,13 +390,13 @@ require("lazy").setup({
       end
 
       vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
-      
+
       map('n', '<leader>t', '<cmd>ToggleTerm direction=float<CR>', { desc = "Terminal" })
       map('n', '<leader>th', '<cmd>ToggleTerm direction=horizontal<CR>', { desc = "Horizontal terminal" })
       map('n', '<leader>tv', '<cmd>ToggleTerm direction=vertical<CR>', { desc = "Vertical terminal" })
     end
   },
-  
+
   -- Git integration
   {
     "lewis6991/gitsigns.nvim",
@@ -413,36 +413,36 @@ require("lazy").setup({
         },
         on_attach = function(bufnr)
           local gs = package.loaded.gitsigns
-          
+
           -- Navigation
           vim.keymap.set('n', ']c', function()
             if vim.wo.diff then return ']c' end
             vim.schedule(function() gs.next_hunk() end)
             return '<Ignore>'
-          end, {expr=true, buffer=bufnr})
+          end, { expr = true, buffer = bufnr })
 
           vim.keymap.set('n', '[c', function()
             if vim.wo.diff then return '[c' end
             vim.schedule(function() gs.prev_hunk() end)
             return '<Ignore>'
-          end, {expr=true, buffer=bufnr})
+          end, { expr = true, buffer = bufnr })
 
           -- Actions
-          vim.keymap.set('n', '<leader>gb', gs.toggle_current_line_blame, {buffer=bufnr, desc = "Toggle git blame"})
-          vim.keymap.set('n', '<leader>gd', gs.diffthis, {buffer=bufnr, desc = "Diff this"})
-          vim.keymap.set('n', '<leader>gD', function() gs.diffthis('~') end, {buffer=bufnr, desc = "Diff this ~"})
-          vim.keymap.set('n', '<leader>hs', gs.stage_hunk, {buffer=bufnr, desc = "Stage hunk"})
-          vim.keymap.set('n', '<leader>hr', gs.reset_hunk, {buffer=bufnr, desc = "Reset hunk"})
-          vim.keymap.set('n', '<leader>hu', gs.undo_stage_hunk, {buffer=bufnr, desc = "Undo stage hunk"})
+          vim.keymap.set('n', '<leader>gb', gs.toggle_current_line_blame, { buffer = bufnr, desc = "Toggle git blame" })
+          vim.keymap.set('n', '<leader>gd', gs.diffthis, { buffer = bufnr, desc = "Diff this" })
+          vim.keymap.set('n', '<leader>gD', function() gs.diffthis('~') end, { buffer = bufnr, desc = "Diff this ~" })
+          vim.keymap.set('n', '<leader>hs', gs.stage_hunk, { buffer = bufnr, desc = "Stage hunk" })
+          vim.keymap.set('n', '<leader>hr', gs.reset_hunk, { buffer = bufnr, desc = "Reset hunk" })
+          vim.keymap.set('n', '<leader>hu', gs.undo_stage_hunk, { buffer = bufnr, desc = "Undo stage hunk" })
         end
       })
     end
   },
-  
+
   -- Advanced Git diff
   {
     "sindrets/diffview.nvim",
-    dependencies = {"nvim-lua/plenary.nvim"},
+    dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       require("diffview").setup({
         enhanced_diff_hl = true,
@@ -456,16 +456,16 @@ require("lazy").setup({
           win_config = { width = 35, position = "left" },
         },
       })
-      
+
       map('n', '<leader>gvd', '<cmd>DiffviewOpen<CR>', { desc = "Open DiffView" })
       map('n', '<leader>gvs', '<cmd>DiffviewOpen --staged<CR>', { desc = "DiffView staged changes" })
       map('n', '<leader>gvf', '<cmd>DiffviewFileHistory %<CR>', { desc = "DiffView file history" })
       map('n', '<leader>gvb', '<cmd>DiffviewFileHistory<CR>', { desc = "DiffView branch history" })
     end
   },
-  
+
   -- Fugitive for Git
-  {"tpope/vim-fugitive", dependencies = {"tpope/vim-rhubarb"}},
+  { "tpope/vim-fugitive", dependencies = { "tpope/vim-rhubarb" } },
 
   -- Debugging
   {
@@ -480,10 +480,10 @@ require("lazy").setup({
       require("dap-go").setup()
       require("dapui").setup()
       require("nvim-dap-virtual-text").setup()
-      
+
       local dap = require("dap")
       local dapui = require("dapui")
-      
+
       map('n', '<F5>', function() dap.continue() end)
       map('n', '<F10>', function() dap.step_over() end)
       map('n', '<F11>', function() dap.step_into() end)
@@ -493,11 +493,11 @@ require("lazy").setup({
       map('n', '<Leader>du', function() dapui.toggle() end)
     end
   },
-  
+
   -- Status line
   {
     "nvim-lualine/lualine.nvim",
-    dependencies = {"nvim-tree/nvim-web-devicons"},
+    dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       require("lualine").setup({
         options = {
@@ -509,11 +509,11 @@ require("lazy").setup({
       })
     end
   },
-  
+
   -- Error display
   {
     "folke/trouble.nvim",
-    dependencies = {"nvim-tree/nvim-web-devicons"},
+    dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       require("trouble").setup({
         position = "bottom",
@@ -521,13 +521,13 @@ require("lazy").setup({
         padding = false,
         auto_preview = true,
       })
-      
-      map("n", "<leader>xx", "<cmd>TroubleToggle<cr>", {silent = true, noremap = true})
-      map("n", "<leader>xd", "<cmd>TroubleToggle document_diagnostics<cr>", {silent = true, noremap = true})
-      map("n", "<leader>xw", "<cmd>TroubleToggle workspace_diagnostics<cr>", {silent = true, noremap = true})
+
+      map("n", "<leader>xx", "<cmd>Trouble<cr>", { silent = true, noremap = true })
+      map("n", "<leader>xd", "<cmd>Trouble diagnostics toggle<cr>", { silent = true, noremap = true })
+      map("n", "<leader>xw", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", { silent = true, noremap = true })
     end
   },
-  
+
   -- Go development
   {
     "ray-x/go.nvim",
@@ -548,7 +548,7 @@ require("lazy").setup({
         lsp_on_attach = false,
         dap_debug = true,
       })
-      
+
       map('n', '<leader>gt', '<cmd>GoTest -v<CR>', { noremap = true, desc = "Go test" })
       map('n', '<leader>gf', '<cmd>GoTestFunc -v<CR>', { noremap = true, desc = "Go test function" })
       map('n', '<leader>gc', '<cmd>GoCoverage<CR>', { noremap = true, desc = "Go coverage" })
@@ -557,7 +557,7 @@ require("lazy").setup({
       map('n', '<leader>gr', '<cmd>GoRun<CR>', { noremap = true, desc = "Go run" })
     end
   },
-  
+
   -- Auto pairs
   {
     "windwp/nvim-autopairs",
@@ -567,19 +567,19 @@ require("lazy").setup({
         check_ts = true,
         fast_wrap = { map = '<M-e>' },
       })
-      
+
       -- Connect to cmp
       local cmp_autopairs = require('nvim-autopairs.completion.cmp')
       local cmp = require('cmp')
       cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
     end
   },
-  
+
   -- Treesitter for better syntax
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
-    dependencies = {"nvim-treesitter/nvim-treesitter-textobjects"},
+    dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" },
     config = function()
       require("nvim-treesitter.configs").setup({
         ensure_installed = { 'go', 'lua', 'markdown', 'yaml', 'json', 'sql', 'bash' },
@@ -623,7 +623,7 @@ require("lazy").setup({
       })
     end
   },
-  
+
   -- Comments
   {
     "numToStr/Comment.nvim",
@@ -631,7 +631,7 @@ require("lazy").setup({
       require("Comment").setup()
     end
   },
-  
+
   -- Indent guides
   {
     "lukas-reineke/indent-blankline.nvim",
@@ -643,7 +643,7 @@ require("lazy").setup({
       })
     end
   },
-  
+
   -- Which-key for keybinding help
   {
     "folke/which-key.nvim",
@@ -651,7 +651,7 @@ require("lazy").setup({
       require("which-key").setup()
     end
   },
-  
+
   -- LSP and completion
   {
     "neovim/nvim-lspconfig",
@@ -676,10 +676,10 @@ require("lazy").setup({
         ensure_installed = { 'gopls', 'lua_ls' },
         automatic_installation = true
       })
-      
+
       -- LSP config
       local capabilities = require('cmp_nvim_lsp').default_capabilities()
-      
+
       -- Common on_attach function for all LSP clients
       local on_attach = function(client, bufnr)
         -- LSP keymaps
@@ -690,13 +690,13 @@ require("lazy").setup({
         vim.keymap.set('n', '<leader>D', vim.lsp.buf.type_definition, opts)
         vim.keymap.set('n', '<leader>fs', vim.lsp.buf.document_symbol, opts)
         vim.keymap.set('n', '<leader>ff', function() vim.lsp.buf.format({ async = true }) end, opts)
-        
+
         -- Diagnostic keymaps
         vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
         vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
         vim.keymap.set('n', '<leader>dl', vim.diagnostic.setloclist, opts)
         vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, opts)
-          
+
         -- Set autoformat
         if client.server_capabilities.documentFormattingProvider then
           vim.api.nvim_create_autocmd("BufWritePre", {
@@ -708,12 +708,12 @@ require("lazy").setup({
           })
         end
       end
-      
+
       -- Gopls setup
       require('lspconfig').gopls.setup({
         capabilities = capabilities,
-        cmd = {"gopls"},
-        filetypes = {"go", "gomod", "gowork", "gotmpl"},
+        cmd = { "gopls" },
+        filetypes = { "go", "gomod", "gowork", "gotmpl" },
         settings = {
           gopls = {
             analyses = {
@@ -735,13 +735,13 @@ require("lazy").setup({
         on_attach = function(client, bufnr)
           client.server_capabilities.semanticTokensProvider = nil
           on_attach(client, bufnr)
-          
+
           -- Go-specific import organization
           vim.api.nvim_create_autocmd("BufWritePre", {
             pattern = "*.go",
             callback = function()
               local params = vim.lsp.util.make_range_params()
-              params.context = {only = {"source.organizeImports"}}
+              params.context = { only = { "source.organizeImports" } }
               local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 3000)
               for _, res in pairs(result or {}) do
                 for _, r in pairs(res.result or {}) do
@@ -756,7 +756,7 @@ require("lazy").setup({
           })
         end,
       })
-      
+
       -- Lua LSP setup
       require('lspconfig').lua_ls.setup({
         capabilities = capabilities,
@@ -764,7 +764,7 @@ require("lazy").setup({
         settings = {
           Lua = {
             runtime = { version = 'LuaJIT' },
-            diagnostics = { globals = {'vim'} },
+            diagnostics = { globals = { 'vim' } },
             workspace = {
               library = vim.api.nvim_get_runtime_file("", true),
               checkThirdParty = false,
@@ -773,16 +773,16 @@ require("lazy").setup({
           },
         },
       })
-      
+
       -- Completion setup
       local cmp = require('cmp')
       local luasnip = require('luasnip')
-      
+
       local has_words_before = function()
         local line, col = unpack(vim.api.nvim_win_get_cursor(0))
         return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
       end
-      
+
       cmp.setup({
         snippet = {
           expand = function(args)
@@ -827,37 +827,37 @@ require("lazy").setup({
           { name = 'path' },
         }),
       })
-      
+
       -- Use buffer source for `/` and cmdline for ':'
       cmp.setup.cmdline('/', {
         mapping = cmp.mapping.preset.cmdline(),
         sources = { { name = 'buffer' } }
       })
-      
+
       cmp.setup.cmdline(':', {
         mapping = cmp.mapping.preset.cmdline(),
-        sources = cmp.config.sources({{ name = 'path' }}, {{ name = 'cmdline' }})
+        sources = cmp.config.sources({ { name = 'path' } }, { { name = 'cmdline' } })
       })
-      
+
       -- Load snippets
       require("luasnip.loaders.from_vscode").lazy_load()
-      
+
       -- Go snippets
       luasnip.add_snippets("go", {
         luasnip.snippet("iferr", {
-          luasnip.text_node({"if err != nil {", "\t"}),
+          luasnip.text_node({ "if err != nil {", "\t" }),
           luasnip.insert_node(1, "return fmt.Errorf(\"failed to %s: %w\", "),
           luasnip.insert_node(2, "task"),
           luasnip.text_node(", err)"),
-          luasnip.text_node({"", "}"})
+          luasnip.text_node({ "", "}" })
         }),
-        
+
         luasnip.snippet("errn", {
-          luasnip.text_node({"if err != nil {", "\t"}),
+          luasnip.text_node({ "if err != nil {", "\t" }),
           luasnip.insert_node(1, "return err"),
-          luasnip.text_node({"", "}"})
+          luasnip.text_node({ "", "}" })
         }),
-        
+
         -- More Go snippets...
       })
     end
@@ -905,7 +905,7 @@ vim.diagnostic.config({
   severity_sort = true,
   float = {
     border = 'rounded',
-    source = 'always',
+    source = true,
     header = '',
     prefix = '',
   },
@@ -919,7 +919,7 @@ for type, icon in pairs(signs) do
 end
 
 -- Print a startup message
-vim.api.nvim_create_autocmd({"VimEnter"}, {
+vim.api.nvim_create_autocmd({ "VimEnter" }, {
   callback = function()
     vim.notify("Neovim configuration loaded successfully with Lazy.nvim!", vim.log.levels.INFO)
   end,
