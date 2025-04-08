@@ -32,6 +32,8 @@ vim.opt.completeopt = "menu,menuone,noselect"
 vim.opt.cmdheight = 2
 vim.opt.history = 1000
 vim.opt.linespace = 1
+vim.opt.guifont = "JetBrains Mono:h14"
+vim.opt.linespace = 4
 
 -- Go-specific settings
 vim.api.nvim_create_autocmd("FileType", {
@@ -290,7 +292,7 @@ require("lazy").setup({
     end
   },
 
-  -- File searching
+  -- File searching - Enhanced for performance
   {
     "nvim-telescope/telescope.nvim",
     dependencies = {
@@ -298,15 +300,48 @@ require("lazy").setup({
       { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
       "nvim-telescope/telescope-ui-select.nvim",
       { "nvim-telescope/telescope-frecency.nvim", dependencies = { "kkharji/sqlite.lua" } },
+      -- Add file browser for improved file management
+      "nvim-telescope/telescope-file-browser.nvim",
     },
     config = function()
-      require("telescope").setup({
+      local telescope = require("telescope")
+      telescope.setup({
         defaults = {
+          -- Optimized ripgrep settings
           vimgrep_arguments = {
-            'rg', '--color=never', '--no-heading', '--with-filename',
-            '--line-number', '--column', '--smart-case', '--hidden',
-            '--glob=!.git/'
+            'rg',
+            '--color=never',
+            '--no-heading',
+            '--with-filename',
+            '--line-number',
+            '--column',
+            '--smart-case',
+            '--hidden',
+            '--glob=!.git/',
+            '--glob=!node_modules/',
+            '--glob=!vendor/',
+            '--glob=!*.min.*',
+            '--glob=!*.map',
+            '--threads=8', -- Use more CPU threads
           },
+
+          -- Skip preview for large files
+          buffer_previewer_maker = function(filepath, bufnr, opts)
+            local max_size = 1000000 -- 1MB
+            local fs_stat = vim.loop.fs_stat(filepath)
+            if fs_stat and fs_stat.size > max_size then
+              vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, { "File too large to preview" })
+              return
+            end
+            require('telescope.previewers').buffer_previewer_maker(filepath, bufnr, opts)
+          end,
+
+          -- Enhanced caching
+          cache_picker = {
+            num_pickers = 20,
+            limit_entries = 1000,
+          },
+
           path_display = { truncate = 3 },
           layout_config = {
             horizontal = { width = 0.95, height = 0.95, preview_width = 0.6 }
@@ -317,40 +352,78 @@ require("lazy").setup({
               ["<C-k>"] = "move_selection_previous",
               ["<C-u>"] = false,
               ["<C-d>"] = "delete_buffer",
+              ["<esc>"] = "close", -- Close with a single Esc press
             },
           },
           file_ignore_patterns = {
             "node_modules", ".git/", "vendor/", "%.lock$", "%.sum$",
+            "%.min.*", "%.map", "%.svg", "%.png", "%.jpg", "%.jpeg",
           },
           prompt_prefix = "   ",
           selection_caret = "  ",
           entry_prefix = "  ",
+          -- Performance optimizations
+          scroll_strategy = "limit", -- Faster than "cycle"
+          dynamic_preview_title = false,
+          results_title = false,
         },
+
         pickers = {
-          find_files = { hidden = true }
+          find_files = {
+            hidden = true,
+            -- Use fd for faster file finding if available
+            find_command = vim.fn.executable("fd") == 1 and
+                { "fd", "--type", "f", "--strip-cwd-prefix", "--hidden", "--exclude", ".git" } or nil
+          },
+          -- Optimize live_grep
+          live_grep = {
+            debounce = 100,
+          },
+          -- Optimize buffers
+          buffers = {
+            sort_lastused = true,
+            sort_mru = true,
+          },
         },
+
         extensions = {
           fzf = {
             fuzzy = true,
             override_generic_sorter = true,
             override_file_sorter = true,
             case_mode = "smart_case",
-          }
+          },
+          file_browser = {
+            hijack_netrw = true,
+            hidden_files = true,
+          },
         },
       })
 
-      -- Load extensions
-      pcall(function() require("telescope").load_extension('fzf') end)
-      pcall(function() require("telescope").load_extension('ui-select') end)
-      pcall(function() require("telescope").load_extension('frecency') end)
+      -- Load extensions safely
+      pcall(function() telescope.load_extension('fzf') end)
+      pcall(function() telescope.load_extension('ui-select') end)
+      pcall(function() telescope.load_extension('frecency') end)
+      pcall(function() telescope.load_extension('file_browser') end)
 
-      -- Telescope keymaps
+      -- Smart file search function: git_files (fast) first, then find_files as fallback
+      local function project_files()
+        local opts = {}
+        local ok = pcall(require('telescope.builtin').git_files, opts)
+        if not ok then
+          require('telescope.builtin').find_files(opts)
+        end
+      end
+
+      -- Optimized file search mappings
+      map('n', '<leader>p', project_files, { desc = "Project files (git first)" })
       map('n', '<leader>f', '<cmd>Telescope find_files hidden=true<CR>', { desc = "Find files" })
       map('n', '<leader>r', '<cmd>Telescope frecency<CR>', { desc = "Recent files" })
       map('n', '<leader>b', '<cmd>Telescope buffers<CR>', { desc = "Buffers" })
       map('n', '<leader>s', '<cmd>Telescope live_grep<CR>', { desc = "Search text" })
       map('n', '<leader>w', '<cmd>Telescope grep_string<CR>', { desc = "Search word" })
       map('n', '<leader>/', '<cmd>Telescope current_buffer_fuzzy_find<CR>', { desc = "Search in buffer" })
+      map('n', '<leader>.', '<cmd>Telescope file_browser<CR>', { desc = "File browser" })
       map('n', '<leader>cs', '<cmd>Telescope lsp_document_symbols<CR>', { desc = "Document symbols" })
       map('n', '<leader>cS', '<cmd>Telescope lsp_workspace_symbols<CR>', { desc = "Workspace symbols" })
       map('n', '<leader>cr', '<cmd>Telescope lsp_references<CR>', { desc = "References" })
@@ -358,6 +431,12 @@ require("lazy").setup({
       map('n', '<leader>gs', '<cmd>Telescope git_status<CR>', { desc = "Git status" })
       map('n', '<leader>gc', '<cmd>Telescope git_commits<CR>', { desc = "Git commits" })
       map('n', '<leader>gb', '<cmd>Telescope git_branches<CR>', { desc = "Git branches" })
+
+      -- Cache clearing command
+      vim.api.nvim_create_user_command("TelescopeCacheClear", function()
+        require('telescope.state').reset_cache()
+        vim.notify("Telescope cache cleared", vim.log.levels.INFO)
+      end, { desc = "Clear Telescope cache" })
     end
   },
 
@@ -484,6 +563,30 @@ require("lazy").setup({
       local dap = require("dap")
       local dapui = require("dapui")
 
+      -- Enhanced Go debugger configuration
+      dap.configurations.go = {
+        {
+          type = "go",
+          name = "Debug Current File",
+          request = "launch",
+          program = "${file}"
+        },
+        {
+          type = "go",
+          name = "Debug Package",
+          request = "launch",
+          program = "${fileDirname}"
+        },
+        {
+          type = "go",
+          name = "Debug Test",
+          request = "launch",
+          mode = "test",
+          program = "${file}"
+        },
+      }
+
+      -- Debug keymaps
       map('n', '<F5>', function() dap.continue() end)
       map('n', '<F10>', function() dap.step_over() end)
       map('n', '<F11>', function() dap.step_into() end)
@@ -491,6 +594,34 @@ require("lazy").setup({
       map('n', '<Leader>db', function() dap.toggle_breakpoint() end)
       map('n', '<Leader>dB', function() dap.set_breakpoint(vim.fn.input('Breakpoint condition: ')) end)
       map('n', '<Leader>du', function() dapui.toggle() end)
+
+      -- Smart debug command for different contexts
+      map('n', '<leader>dd', function()
+        local filetype = vim.bo.filetype
+        if filetype == "go" then
+          local file = vim.fn.expand('%:p')
+          local dir = vim.fn.expand('%:p:h')
+
+          -- Check if this is a test file
+          local is_test = string.match(file, "_test%.go$")
+
+          if is_test then
+            require('dap-go').debug_test()
+          else
+            -- For regular Go files, try to find main package
+            dap.run({
+              type = "go",
+              name = "Debug",
+              request = "launch",
+              program = dir,
+              args = {},
+            })
+          end
+        else
+          -- For other filetypes
+          dap.continue()
+        end
+      end, { desc = "Smart debug" })
     end
   },
 
@@ -918,9 +1049,30 @@ for type, icon in pairs(signs) do
   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
 end
 
+-- Eye care - rest reminder
+vim.api.nvim_create_autocmd({ "CursorHold" }, {
+  callback = function()
+    -- Only show if we've been in the file for more than 20 minutes
+    local time_in_file = vim.b.start_time or os.time()
+    if (os.time() - time_in_file) > 1200 then -- 20 minutes
+      vim.api.nvim_echo({ { " 👁️  Time for a quick eye break? Look 20ft away for 20 seconds. ", "WarningMsg" } }, false,
+        {})
+    end
+  end,
+  pattern = "*",
+})
+
+vim.api.nvim_create_autocmd({ "BufEnter" }, {
+  callback = function()
+    -- Track when we start editing each buffer
+    vim.b.start_time = os.time()
+  end,
+  pattern = "*",
+})
+
 -- Print a startup message
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
   callback = function()
-    vim.notify("Neovim configuration loaded successfully with Lazy.nvim!", vim.log.levels.INFO)
+    vim.notify("Neovim configuration loaded with optimized file search!", vim.log.levels.INFO)
   end,
 })
