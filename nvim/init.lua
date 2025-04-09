@@ -150,13 +150,15 @@ require("lazy").setup({
     end
   },
 
-  -- Code Structure
+  -- Code Structure - Modified for auto-open
   {
     "simrat39/symbols-outline.nvim",
     config = function()
       require("symbols-outline").setup({
         autofold_depth = 1,
         auto_preview = false,
+        position = 'right', -- Place on the right side
+        width = 35,         -- Slightly wider for better method visibility
         keymaps = {
           close = { "<Esc>", "q" },
           goto_location = "<CR>",
@@ -267,18 +269,38 @@ require("lazy").setup({
     end
   },
 
-  -- File tree and navigation
+  -- File tree and navigation - Modified for wider view
   {
     "nvim-tree/nvim-tree.lua",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       require("nvim-tree").setup({
         sort_by = "case_sensitive",
-        view = { width = 30 },
+        view = {
+          width = 40,            -- Increased from 30 to 40 for better nested folder display
+          adaptive_size = false, -- Don't automatically resize
+        },
         renderer = {
           group_empty = true,
           highlight_git = true,
           highlight_opened_files = "all",
+          indent_markers = {
+            enable = true, -- Show indent markers for better hierarchy visualization
+            icons = {
+              corner = "└ ",
+              edge = "│ ",
+              item = "│ ",
+              none = "  ",
+            },
+          },
+          icons = {
+            show = {
+              file = true,
+              folder = true,
+              folder_arrow = true,
+              git = true,
+            },
+          },
         },
         filters = { dotfiles = false },
         git = { ignore = false },
@@ -286,13 +308,15 @@ require("lazy").setup({
           enable = true,
           update_root = false,
         },
+        open_on_setup = true,           -- Open when Neovim starts with a directory
+        open_on_setup_file = false,     -- Don't open when opening a file
       })
       map('n', '<leader>e', ':NvimTreeToggle<CR>', { silent = true, desc = "Toggle file explorer" })
       map('n', '<leader>pv', ':NvimTreeFindFile<CR>', { silent = true, desc = "Find current file" })
     end
   },
 
-  -- File searching - Enhanced for performance
+  -- File searching - Optimized for performance
   {
     "nvim-telescope/telescope.nvim",
     dependencies = {
@@ -325,15 +349,30 @@ require("lazy").setup({
             '--threads=8', -- Use more CPU threads
           },
 
-          -- Skip preview for large files
+          -- Skip preview for large files - FIXED: Completely bypass colorization for large files
           buffer_previewer_maker = function(filepath, bufnr, opts)
             local max_size = 1000000 -- 1MB
             local fs_stat = vim.loop.fs_stat(filepath)
+            
             if fs_stat and fs_stat.size > max_size then
-              vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, { "File too large to preview" })
-              return
+              -- Create a new custom previewer that won't attempt to colorize
+              vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, { 
+                "File too large to preview",
+                string.format("Size: %.2f MB", fs_stat.size / 1024 / 1024),
+                "",
+                "Path: " .. filepath
+              })
+              
+              -- Set options to prevent syntax highlighting and other processing
+              vim.api.nvim_buf_set_option(bufnr, 'filetype', 'text')
+              vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'wipe')
+              
+              -- Return true to indicate we've handled this file
+              return true
             end
-            require('telescope.previewers').buffer_previewer_maker(filepath, bufnr, opts)
+            
+            -- For normal sized files, use the default previewer
+            return require('telescope.previewers').buffer_previewer_maker(filepath, bufnr, opts)
           end,
 
           -- Enhanced caching
@@ -415,7 +454,7 @@ require("lazy").setup({
         end
       end
 
-      -- Optimized file search mappings
+      -- Optimized file search mappings with previewer disabled
       map('n', '<leader>p', project_files, { desc = "Project files (git first)" })
       map('n', '<leader>f', '<cmd>Telescope find_files hidden=true<CR>', { desc = "Find files" })
       map('n', '<leader>r', '<cmd>Telescope frecency<CR>', { desc = "Recent files" })
@@ -563,7 +602,7 @@ require("lazy").setup({
       local dap = require("dap")
       local dapui = require("dapui")
 
-      -- Enhanced Go debugger configuration
+      -- Configure Go debugging
       dap.configurations.go = {
         {
           type = "go",
@@ -583,10 +622,10 @@ require("lazy").setup({
           request = "launch",
           mode = "test",
           program = "${file}"
-        },
+        }
       }
 
-      -- Debug keymaps
+      -- Set debugging keymaps
       map('n', '<F5>', function() dap.continue() end)
       map('n', '<F10>', function() dap.step_over() end)
       map('n', '<F11>', function() dap.step_into() end)
@@ -595,7 +634,7 @@ require("lazy").setup({
       map('n', '<Leader>dB', function() dap.set_breakpoint(vim.fn.input('Breakpoint condition: ')) end)
       map('n', '<Leader>du', function() dapui.toggle() end)
 
-      -- Smart debug command for different contexts
+      -- Add specialized debug command
       map('n', '<leader>dd', function()
         local filetype = vim.bo.filetype
         if filetype == "go" then
@@ -641,19 +680,24 @@ require("lazy").setup({
     end
   },
 
-  -- Error display
+  -- Error display - Modified to auto-open
   {
     "folke/trouble.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       require("trouble").setup({
         position = "bottom",
-        height = 15,
+        height = 12,        -- Slightly shorter to leave more room for code
         padding = false,
         auto_preview = true,
+        mode = "workspace_diagnostics",
+        -- Remove auto_open from global config
+        -- Use the correct format for modes configuration
+        auto_open = false,  -- Disable auto_open globally
+        auto_close = false, -- Don't auto-close
       })
 
-      map("n", "<leader>xx", "<cmd>Trouble<cr>", { silent = true, noremap = true })
+      map("n", "<leader>xx", "<cmd>TroubleToggle<cr>", { silent = true, noremap = true })
       map("n", "<leader>xd", "<cmd>Trouble diagnostics toggle<cr>", { silent = true, noremap = true })
       map("n", "<leader>xw", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", { silent = true, noremap = true })
     end
@@ -1049,30 +1093,78 @@ for type, icon in pairs(signs) do
   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
 end
 
--- Eye care - rest reminder
-vim.api.nvim_create_autocmd({ "CursorHold" }, {
+-- Set up ideal layout on startup
+vim.api.nvim_create_autocmd({ "VimEnter" }, {
   callback = function()
-    -- Only show if we've been in the file for more than 20 minutes
-    local time_in_file = vim.b.start_time or os.time()
-    if (os.time() - time_in_file) > 1200 then -- 20 minutes
-      vim.api.nvim_echo({ { " 👁️  Time for a quick eye break? Look 20ft away for 20 seconds. ", "WarningMsg" } }, false,
-        {})
-    end
+    -- Open NvimTree
+    vim.cmd("NvimTreeToggle")
+
+    -- Wait for LSP to start before opening Symbols Outline
+    vim.defer_fn(function()
+      vim.cmd("SymbolsOutline")
+
+      -- Adjust layout proportionally
+      vim.defer_fn(function()
+        -- Use window navigation with proper spacing
+        vim.cmd("wincmd h") -- Go to leftmost window (NvimTree)
+        vim.cmd("vertical resize 40")
+        
+        vim.cmd("wincmd l") -- Go to main editor
+        
+        vim.cmd("wincmd l") -- Go to rightmost window (Symbols Outline)
+        vim.cmd("vertical resize 35")
+        
+        vim.cmd("wincmd h") -- Return to main editor
+      end, 100)
+    end, 800) -- Wait longer for LSP to initialize
   end,
-  pattern = "*",
 })
 
-vim.api.nvim_create_autocmd({ "BufEnter" }, {
-  callback = function()
-    -- Track when we start editing each buffer
-    vim.b.start_time = os.time()
-  end,
-  pattern = "*",
-})
+-- Add a command to restore this layout if it gets disrupted
+vim.api.nvim_create_user_command("RestoreLayout", function()
+  -- If NvimTree isn't open, open it
+  if vim.fn.bufwinnr("NvimTree") == -1 then
+    vim.cmd("NvimTreeToggle")
+  end
+
+  -- If Symbols Outline isn't open, open it
+  if vim.fn.bufwinnr("OUTLINE") == -1 then
+    vim.cmd("SymbolsOutline")
+  end
+
+  -- If Trouble isn't open, open it
+  if vim.fn.bufwinnr("Trouble") == -1 then
+    vim.cmd("Trouble")
+  end
+
+  -- Adjust the layout
+  vim.defer_fn(function()
+    -- Use relative window navigation instead of numbered windows
+    vim.cmd("wincmd h") -- Go to leftmost window (NvimTree)
+    vim.cmd("vertical resize 40")
+    
+    vim.cmd("wincmd l") -- Go to main editor
+    
+    vim.cmd("wincmd l") -- Go to rightmost window (Symbols Outline)
+    vim.cmd("vertical resize 35")
+    
+    vim.cmd("wincmd h") -- Return to main editor
+  end, 100)
+end, { desc = "Restore IDE-like window layout" })
+
+-- Map it to a key for easy access
+map('n', '<leader>ll', ':RestoreLayout<CR>', { silent = true, desc = "Restore window layout" })
 
 -- Print a startup message
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
   callback = function()
-    vim.notify("Neovim configuration loaded with optimized file search!", vim.log.levels.INFO)
+    vim.notify("Neovim configuration loaded successfully with Lazy.nvim!", vim.log.levels.INFO)
+    
+    -- Ensure NvimTree is open after startup
+    vim.defer_fn(function() 
+      if vim.fn.bufwinnr("NvimTree") == -1 then
+        vim.cmd("NvimTreeToggle") 
+      end
+    end, 100)
   end,
 })
