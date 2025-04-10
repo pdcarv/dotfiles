@@ -331,6 +331,12 @@ require("lazy").setup({
       local telescope = require("telescope")
       telescope.setup({
         defaults = {
+          -- Completely disable all previewers
+          previewer = false,
+          file_previewer = false,
+          grep_previewer = false,
+          qflist_previewer = false,
+          
           -- Optimized ripgrep settings
           vimgrep_arguments = {
             'rg',
@@ -348,32 +354,6 @@ require("lazy").setup({
             '--glob=!*.map',
             '--threads=8', -- Use more CPU threads
           },
-
-          -- Skip preview for large files - FIXED: Completely bypass colorization for large files
-          buffer_previewer_maker = function(filepath, bufnr, opts)
-            local max_size = 1000000 -- 1MB
-            local fs_stat = vim.loop.fs_stat(filepath)
-            
-            if fs_stat and fs_stat.size > max_size then
-              -- Create a new custom previewer that won't attempt to colorize
-              vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, { 
-                "File too large to preview",
-                string.format("Size: %.2f MB", fs_stat.size / 1024 / 1024),
-                "",
-                "Path: " .. filepath
-              })
-              
-              -- Set options to prevent syntax highlighting and other processing
-              vim.api.nvim_buf_set_option(bufnr, 'filetype', 'text')
-              vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'wipe')
-              
-              -- Return true to indicate we've handled this file
-              return true
-            end
-            
-            -- For normal sized files, use the default previewer
-            return require('telescope.previewers').buffer_previewer_maker(filepath, bufnr, opts)
-          end,
 
           -- Enhanced caching
           cache_picker = {
@@ -445,6 +425,13 @@ require("lazy").setup({
       pcall(function() telescope.load_extension('frecency') end)
       pcall(function() telescope.load_extension('file_browser') end)
 
+      -- Override the buffer previewer to completely prevent the issue
+      -- This monkey patches the problematic function to do nothing
+      require('telescope.previewers.buffer_previewer').set_colorize_lines = function(bufnr, start, finish)
+        -- Do nothing, effectively disabling syntax highlighting in previews
+        return
+      end
+
       -- Smart file search function: git_files (fast) first, then find_files as fallback
       local function project_files()
         local opts = {}
@@ -454,7 +441,7 @@ require("lazy").setup({
         end
       end
 
-      -- Optimized file search mappings with previewer disabled
+      -- Optimized file search mappings
       map('n', '<leader>p', project_files, { desc = "Project files (git first)" })
       map('n', '<leader>f', '<cmd>Telescope find_files hidden=true<CR>', { desc = "Find files" })
       map('n', '<leader>r', '<cmd>Telescope frecency<CR>', { desc = "Recent files" })
@@ -689,12 +676,10 @@ require("lazy").setup({
         position = "bottom",
         height = 12,        -- Slightly shorter to leave more room for code
         padding = false,
+        auto_open = false,  -- FIX: Disable auto_open globally
+        auto_close = false, -- Don't auto-close
         auto_preview = true,
         mode = "workspace_diagnostics",
-        -- Remove auto_open from global config
-        -- Use the correct format for modes configuration
-        auto_open = false,  -- Disable auto_open globally
-        auto_close = false, -- Don't auto-close
       })
 
       map("n", "<leader>xx", "<cmd>TroubleToggle<cr>", { silent = true, noremap = true })
@@ -1105,8 +1090,8 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 
       -- Adjust layout proportionally
       vim.defer_fn(function()
-        -- Use window navigation with proper spacing
-        vim.cmd("wincmd h") -- Go to leftmost window (NvimTree)
+        -- FIX: Use directional navigation instead of numbered windows
+        vim.cmd("wincmd h") -- Go to leftmost window (NvimTree)  
         vim.cmd("vertical resize 40")
         
         vim.cmd("wincmd l") -- Go to main editor
@@ -1139,7 +1124,7 @@ vim.api.nvim_create_user_command("RestoreLayout", function()
 
   -- Adjust the layout
   vim.defer_fn(function()
-    -- Use relative window navigation instead of numbered windows
+    -- FIX: Use directional navigation instead of numbered windows
     vim.cmd("wincmd h") -- Go to leftmost window (NvimTree)
     vim.cmd("vertical resize 40")
     
