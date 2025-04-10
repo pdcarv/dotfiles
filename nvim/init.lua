@@ -308,8 +308,6 @@ require("lazy").setup({
           enable = true,
           update_root = false,
         },
-        open_on_setup = true,           -- Open when Neovim starts with a directory
-        open_on_setup_file = false,     -- Don't open when opening a file
       })
       map('n', '<leader>e', ':NvimTreeToggle<CR>', { silent = true, desc = "Toggle file explorer" })
       map('n', '<leader>pv', ':NvimTreeFindFile<CR>', { silent = true, desc = "Find current file" })
@@ -336,7 +334,7 @@ require("lazy").setup({
           file_previewer = false,
           grep_previewer = false,
           qflist_previewer = false,
-          
+
           -- Optimized ripgrep settings
           vimgrep_arguments = {
             'rg',
@@ -1091,17 +1089,17 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
       -- Adjust layout proportionally
       vim.defer_fn(function()
         -- FIX: Use directional navigation instead of numbered windows
-        vim.cmd("wincmd h") -- Go to leftmost window (NvimTree)  
+        vim.cmd("wincmd h") -- Go to leftmost window (NvimTree)
         vim.cmd("vertical resize 40")
-        
+
         vim.cmd("wincmd l") -- Go to main editor
-        
+
         vim.cmd("wincmd l") -- Go to rightmost window (Symbols Outline)
         vim.cmd("vertical resize 35")
-        
+
         vim.cmd("wincmd h") -- Return to main editor
       end, 100)
-    end, 800) -- Wait longer for LSP to initialize
+    end, 800)               -- Wait longer for LSP to initialize
   end,
 })
 
@@ -1127,12 +1125,12 @@ vim.api.nvim_create_user_command("RestoreLayout", function()
     -- FIX: Use directional navigation instead of numbered windows
     vim.cmd("wincmd h") -- Go to leftmost window (NvimTree)
     vim.cmd("vertical resize 40")
-    
+
     vim.cmd("wincmd l") -- Go to main editor
-    
+
     vim.cmd("wincmd l") -- Go to rightmost window (Symbols Outline)
     vim.cmd("vertical resize 35")
-    
+
     vim.cmd("wincmd h") -- Return to main editor
   end, 100)
 end, { desc = "Restore IDE-like window layout" })
@@ -1144,11 +1142,11 @@ map('n', '<leader>ll', ':RestoreLayout<CR>', { silent = true, desc = "Restore wi
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
   callback = function()
     vim.notify("Neovim configuration loaded successfully with Lazy.nvim!", vim.log.levels.INFO)
-    
+
     -- Ensure NvimTree is open after startup
-    vim.defer_fn(function() 
+    vim.defer_fn(function()
       if vim.fn.bufwinnr("NvimTree") == -1 then
-        vim.cmd("NvimTreeToggle") 
+        vim.cmd("NvimTreeToggle")
       end
     end, 100)
   end,
