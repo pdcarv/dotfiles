@@ -308,6 +308,7 @@ require("lazy").setup({
           enable = true,
           update_root = false,
         },
+        -- Using on_attach event instead of deprecated open_on_setup option
       })
       map('n', '<leader>e', ':NvimTreeToggle<CR>', { silent = true, desc = "Toggle file explorer" })
       map('n', '<leader>pv', ':NvimTreeFindFile<CR>', { silent = true, desc = "Find current file" })
@@ -329,12 +330,16 @@ require("lazy").setup({
       local telescope = require("telescope")
       telescope.setup({
         defaults = {
-          -- Completely disable all previewers
-          previewer = false,
-          file_previewer = false,
-          grep_previewer = false,
-          qflist_previewer = false,
-
+          -- Set up minimal previewer settings that won't cause errors
+          preview = {
+            timeout = 150,
+            msg_bg_fillchar = " ",
+          },
+          buffer_previewer_maker = function(filepath, bufnr, opts)
+            -- Do nothing but return successfully
+            return true
+          end,
+          
           -- Optimized ripgrep settings
           vimgrep_arguments = {
             'rg',
@@ -423,16 +428,22 @@ require("lazy").setup({
       pcall(function() telescope.load_extension('frecency') end)
       pcall(function() telescope.load_extension('file_browser') end)
 
-      -- Override the buffer previewer to completely prevent the issue
-      -- This monkey patches the problematic function to do nothing
-      require('telescope.previewers.buffer_previewer').set_colorize_lines = function(bufnr, start, finish)
-        -- Do nothing, effectively disabling syntax highlighting in previews
-        return
-      end
+      -- Create a set of dummy previewers that do nothing but don't error
+      local previewers = require('telescope.previewers')
+      local dummy_previewer = previewers.new_buffer_previewer({
+        define_preview = function() return end
+      })
+
+      -- Monkey patch just to be safe
+      pcall(function()
+        require('telescope.previewers.buffer_previewer').set_colorize_lines = function()
+          return
+        end
+      end)
 
       -- Smart file search function: git_files (fast) first, then find_files as fallback
       local function project_files()
-        local opts = {}
+        local opts = { previewer = dummy_previewer }
         local ok = pcall(require('telescope.builtin').git_files, opts)
         if not ok then
           require('telescope.builtin').find_files(opts)
@@ -441,20 +452,20 @@ require("lazy").setup({
 
       -- Optimized file search mappings
       map('n', '<leader>p', project_files, { desc = "Project files (git first)" })
-      map('n', '<leader>f', '<cmd>Telescope find_files hidden=true<CR>', { desc = "Find files" })
-      map('n', '<leader>r', '<cmd>Telescope frecency<CR>', { desc = "Recent files" })
-      map('n', '<leader>b', '<cmd>Telescope buffers<CR>', { desc = "Buffers" })
-      map('n', '<leader>s', '<cmd>Telescope live_grep<CR>', { desc = "Search text" })
-      map('n', '<leader>w', '<cmd>Telescope grep_string<CR>', { desc = "Search word" })
-      map('n', '<leader>/', '<cmd>Telescope current_buffer_fuzzy_find<CR>', { desc = "Search in buffer" })
-      map('n', '<leader>.', '<cmd>Telescope file_browser<CR>', { desc = "File browser" })
-      map('n', '<leader>cs', '<cmd>Telescope lsp_document_symbols<CR>', { desc = "Document symbols" })
-      map('n', '<leader>cS', '<cmd>Telescope lsp_workspace_symbols<CR>', { desc = "Workspace symbols" })
-      map('n', '<leader>cr', '<cmd>Telescope lsp_references<CR>', { desc = "References" })
-      map('n', '<leader>cd', '<cmd>Telescope diagnostics<CR>', { desc = "Diagnostics" })
-      map('n', '<leader>gs', '<cmd>Telescope git_status<CR>', { desc = "Git status" })
-      map('n', '<leader>gc', '<cmd>Telescope git_commits<CR>', { desc = "Git commits" })
-      map('n', '<leader>gb', '<cmd>Telescope git_branches<CR>', { desc = "Git branches" })
+      map('n', '<leader>f', function() require('telescope.builtin').find_files({ previewer = dummy_previewer }) end, { desc = "Find files" })
+      map('n', '<leader>r', function() require('telescope.builtin').frecency({ previewer = dummy_previewer }) end, { desc = "Recent files" })
+      map('n', '<leader>b', function() require('telescope.builtin').buffers({ previewer = dummy_previewer }) end, { desc = "Buffers" })
+      map('n', '<leader>s', function() require('telescope.builtin').live_grep({ previewer = dummy_previewer }) end, { desc = "Search text" })
+      map('n', '<leader>w', function() require('telescope.builtin').grep_string({ previewer = dummy_previewer }) end, { desc = "Search word" })
+      map('n', '<leader>/', function() require('telescope.builtin').current_buffer_fuzzy_find({ previewer = dummy_previewer }) end, { desc = "Search in buffer" })
+      map('n', '<leader>.', function() require('telescope.builtin').file_browser({ previewer = dummy_previewer }) end, { desc = "File browser" })
+      map('n', '<leader>cs', function() require('telescope.builtin').lsp_document_symbols({ previewer = dummy_previewer }) end, { desc = "Document symbols" })
+      map('n', '<leader>cS', function() require('telescope.builtin').lsp_workspace_symbols({ previewer = dummy_previewer }) end, { desc = "Workspace symbols" })
+      map('n', '<leader>cr', function() require('telescope.builtin').lsp_references({ previewer = dummy_previewer }) end, { desc = "References" })
+      map('n', '<leader>cd', function() require('telescope.builtin').diagnostics({ previewer = dummy_previewer }) end, { desc = "Diagnostics" })
+      map('n', '<leader>gs', function() require('telescope.builtin').git_status({ previewer = dummy_previewer }) end, { desc = "Git status" })
+      map('n', '<leader>gc', function() require('telescope.builtin').git_commits({ previewer = dummy_previewer }) end, { desc = "Git commits" })
+      map('n', '<leader>gb', function() require('telescope.builtin').git_branches({ previewer = dummy_previewer }) end, { desc = "Git branches" })
 
       -- Cache clearing command
       vim.api.nvim_create_user_command("TelescopeCacheClear", function()
@@ -1089,17 +1100,17 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
       -- Adjust layout proportionally
       vim.defer_fn(function()
         -- FIX: Use directional navigation instead of numbered windows
-        vim.cmd("wincmd h") -- Go to leftmost window (NvimTree)
+        vim.cmd("wincmd h") -- Go to leftmost window (NvimTree)  
         vim.cmd("vertical resize 40")
-
+        
         vim.cmd("wincmd l") -- Go to main editor
-
+        
         vim.cmd("wincmd l") -- Go to rightmost window (Symbols Outline)
         vim.cmd("vertical resize 35")
-
+        
         vim.cmd("wincmd h") -- Return to main editor
       end, 100)
-    end, 800)               -- Wait longer for LSP to initialize
+    end, 800) -- Wait longer for LSP to initialize
   end,
 })
 
@@ -1125,12 +1136,12 @@ vim.api.nvim_create_user_command("RestoreLayout", function()
     -- FIX: Use directional navigation instead of numbered windows
     vim.cmd("wincmd h") -- Go to leftmost window (NvimTree)
     vim.cmd("vertical resize 40")
-
+    
     vim.cmd("wincmd l") -- Go to main editor
-
+    
     vim.cmd("wincmd l") -- Go to rightmost window (Symbols Outline)
     vim.cmd("vertical resize 35")
-
+    
     vim.cmd("wincmd h") -- Return to main editor
   end, 100)
 end, { desc = "Restore IDE-like window layout" })
@@ -1138,15 +1149,22 @@ end, { desc = "Restore IDE-like window layout" })
 -- Map it to a key for easy access
 map('n', '<leader>ll', ':RestoreLayout<CR>', { silent = true, desc = "Restore window layout" })
 
--- Print a startup message
+-- Print a startup message and ensure NvimTree is open
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
   callback = function()
     vim.notify("Neovim configuration loaded successfully with Lazy.nvim!", vim.log.levels.INFO)
-
-    -- Ensure NvimTree is open after startup
-    vim.defer_fn(function()
+    
+    -- Open NvimTree when starting Neovim (replaces deprecated open_on_setup option)
+    local args = vim.fn.argv()
+    -- Only open nvim-tree if we're in a directory or have no args
+    if #args > 0 and vim.fn.isdirectory(args[1]) > 0 or #args == 0 then
+      vim.cmd("NvimTreeToggle")
+    end
+    
+    -- Ensure NvimTree is open after startup in all cases
+    vim.defer_fn(function() 
       if vim.fn.bufwinnr("NvimTree") == -1 then
-        vim.cmd("NvimTreeToggle")
+        vim.cmd("NvimTreeToggle") 
       end
     end, 100)
   end,
