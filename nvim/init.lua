@@ -3,6 +3,10 @@
 -- Initial Setup
 vim.g.mapleader = " " -- Set leader key before loading plugins
 
+-- Disable netrw (Vim's default file browser)
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
 -- Create autocommand groups
 local format_group = vim.api.nvim_create_augroup("Format", { clear = true })
 local go_group = vim.api.nvim_create_augroup("Go", { clear = true })
@@ -31,9 +35,9 @@ vim.opt.colorcolumn = "100"
 vim.opt.completeopt = "menu,menuone,noselect"
 vim.opt.cmdheight = 2
 vim.opt.history = 1000
-vim.opt.linespace = 1
-vim.opt.guifont = "JetBrains Mono:h14"
+-- Fix: Remove duplicate linespace setting
 vim.opt.linespace = 4
+vim.opt.guifont = "JetBrains Mono:h14"
 
 -- Go-specific settings
 vim.api.nvim_create_autocmd("FileType", {
@@ -68,6 +72,9 @@ if not vim.loop.fs_stat(lazypath) then
   })
 end
 vim.opt.rtp:prepend(lazypath)
+
+-- We'll define telescope previewer function inside the telescope config
+-- to avoid requiring the module before it's loaded
 
 -- Plugin specification
 require("lazy").setup({
@@ -104,6 +111,7 @@ require("lazy").setup({
   -- macOS System Appearance Detection
   {
     "f-person/auto-dark-mode.nvim",
+    event = "VimEnter", -- Lazy-load on VimEnter
     config = function()
       require("auto-dark-mode").setup({
         update_interval = 1000,
@@ -116,9 +124,7 @@ require("lazy").setup({
           vim.api.nvim_set_option('background', 'light')
         end,
       })
-      vim.defer_fn(function()
-        pcall(function() require("auto-dark-mode").init() end)
-      end, 500)
+      pcall(function() require("auto-dark-mode").init() end)
     end
   },
 
@@ -126,6 +132,7 @@ require("lazy").setup({
   {
     "phaazon/hop.nvim",
     branch = "v2",
+    keys = { "s", "S", "<leader>j" }, -- Lazy-load on key combinations
     config = function()
       require("hop").setup()
       map('n', 's', ':HopChar2<CR>', { silent = true })
@@ -138,6 +145,7 @@ require("lazy").setup({
   {
     "ThePrimeagen/harpoon",
     dependencies = { "nvim-lua/plenary.nvim" },
+    keys = { "<leader>a", "<C-e>", "<C-1>", "<C-2>", "<C-3>", "<C-4>" }, -- Lazy-load
     config = function()
       local mark = require("harpoon.mark")
       local ui = require("harpoon.ui")
@@ -153,6 +161,8 @@ require("lazy").setup({
   -- Code Structure - Modified for auto-open
   {
     "simrat39/symbols-outline.nvim",
+    cmd = "SymbolsOutline", -- Lazy-load on command
+    keys = { "<leader>o" }, -- Lazy-load on key
     config = function()
       require("symbols-outline").setup({
         autofold_depth = 1,
@@ -171,11 +181,15 @@ require("lazy").setup({
   },
 
   -- Multi-cursor
-  "mg979/vim-visual-multi",
+  {
+    "mg979/vim-visual-multi",
+    event = "BufReadPost", -- Lazy-load after buffer is read
+  },
 
   -- Code Peeking
   {
     "dnlhc/glance.nvim",
+    keys = { "gd", "gr", "gi", "gy" }, -- Lazy-load on keys
     config = function()
       require("glance").setup({
         border = { enable = true },
@@ -192,6 +206,7 @@ require("lazy").setup({
   {
     "kevinhwang91/nvim-ufo",
     dependencies = { "kevinhwang91/promise-async" },
+    event = "BufReadPost", -- Lazy-load after buffer is read
     config = function()
       vim.o.foldcolumn = '1'
       vim.o.foldlevel = 99
@@ -221,6 +236,8 @@ require("lazy").setup({
   {
     "folke/todo-comments.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
+    event = "BufReadPost",               -- Lazy-load after buffer is read
+    keys = { "]t", "[t", "<leader>td" }, -- Load on these keys
     config = function()
       require("todo-comments").setup({
         keywords = {
@@ -243,6 +260,7 @@ require("lazy").setup({
   {
     "nvim-pack/nvim-spectre",
     dependencies = { "nvim-lua/plenary.nvim" },
+    keys = { "<leader>S", "<leader>sw" }, -- Lazy-load on keys
     config = function()
       require("spectre").setup()
       map('n', '<leader>S', '<cmd>lua require("spectre").open()<CR>', { desc = "Search and replace" })
@@ -253,6 +271,7 @@ require("lazy").setup({
   -- Enhanced text objects
   {
     "echasnovski/mini.ai",
+    event = "BufReadPost", -- Lazy-load after buffer is read
     config = function()
       require("mini.ai").setup({
         custom_textobjects = {
@@ -273,19 +292,25 @@ require("lazy").setup({
   {
     "nvim-tree/nvim-tree.lua",
     dependencies = { "nvim-tree/nvim-web-devicons" },
+    keys = { "<leader>e", "<leader>pv" },           -- Lazy-load on keys
+    cmd = { "NvimTreeToggle", "NvimTreeFindFile" }, -- Lazy-load on command
+    init = function()
+      -- This runs at startup but doesn't load the full plugin yet
+      vim.defer_fn(function() vim.cmd("NvimTreeToggle") end, 10)
+    end,
     config = function()
       require("nvim-tree").setup({
         sort_by = "case_sensitive",
         view = {
-          width = 40,            -- Increased from 30 to 40 for better nested folder display
-          adaptive_size = false, -- Don't automatically resize
+          width = 40,
+          adaptive_size = false,
         },
         renderer = {
           group_empty = true,
           highlight_git = true,
           highlight_opened_files = "all",
           indent_markers = {
-            enable = true, -- Show indent markers for better hierarchy visualization
+            enable = true,
             icons = {
               corner = "└ ",
               edge = "│ ",
@@ -308,7 +333,6 @@ require("lazy").setup({
           enable = true,
           update_root = false,
         },
-        -- Using on_attach event instead of deprecated open_on_setup option
       })
       map('n', '<leader>e', ':NvimTreeToggle<CR>', { silent = true, desc = "Toggle file explorer" })
       map('n', '<leader>pv', ':NvimTreeFindFile<CR>', { silent = true, desc = "Find current file" })
@@ -319,27 +343,34 @@ require("lazy").setup({
   {
     "nvim-telescope/telescope.nvim",
     dependencies = {
-      { "nvim-lua/plenary.nvim" },
+      "nvim-lua/plenary.nvim",
       { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
       "nvim-telescope/telescope-ui-select.nvim",
-      { "nvim-telescope/telescope-frecency.nvim", dependencies = { "kkharji/sqlite.lua" } },
-      -- Add file browser for improved file management
+      { "nvim-telescope/telescope-frecency.nvim",   dependencies = { "kkharji/sqlite.lua" } },
       "nvim-telescope/telescope-file-browser.nvim",
+    },
+    cmd = "Telescope", -- Lazy-load on command
+    keys = {           -- Lazy-load on all these keys
+      "<leader>p", "<leader>f", "<leader>r", "<leader>b", "<leader>s",
+      "<leader>w", "<leader>/", "<leader>.", "<leader>cs", "<leader>cS",
+      "<leader>cr", "<leader>cd", "<leader>gs", "<leader>gc", "<leader>gb"
     },
     config = function()
       local telescope = require("telescope")
+
+      -- Create a no-op previewer definition
+      local no_preview = function()
+        local previewers = require("telescope.previewers")
+        return previewers.new_buffer_previewer({
+          define_preview = function() return end
+        })
+      end
+
       telescope.setup({
         defaults = {
-          -- Set up minimal previewer settings that won't cause errors
-          preview = {
-            timeout = 150,
-            msg_bg_fillchar = " ",
-          },
-          buffer_previewer_maker = function(filepath, bufnr, opts)
-            -- Do nothing but return successfully
-            return true
-          end,
-          
+          -- Disable previews for performance
+          previewer = false,
+
           -- Optimized ripgrep settings
           vimgrep_arguments = {
             'rg',
@@ -355,7 +386,7 @@ require("lazy").setup({
             '--glob=!vendor/',
             '--glob=!*.min.*',
             '--glob=!*.map',
-            '--threads=8', -- Use more CPU threads
+            '--threads=8',
           },
 
           -- Enhanced caching
@@ -385,7 +416,7 @@ require("lazy").setup({
           selection_caret = "  ",
           entry_prefix = "  ",
           -- Performance optimizations
-          scroll_strategy = "limit", -- Faster than "cycle"
+          scroll_strategy = "limit",
           dynamic_preview_title = false,
           results_title = false,
         },
@@ -423,49 +454,38 @@ require("lazy").setup({
       })
 
       -- Load extensions safely
-      pcall(function() telescope.load_extension('fzf') end)
-      pcall(function() telescope.load_extension('ui-select') end)
-      pcall(function() telescope.load_extension('frecency') end)
-      pcall(function() telescope.load_extension('file_browser') end)
-
-      -- Create a set of dummy previewers that do nothing but don't error
-      local previewers = require('telescope.previewers')
-      local dummy_previewer = previewers.new_buffer_previewer({
-        define_preview = function() return end
-      })
-
-      -- Monkey patch just to be safe
-      pcall(function()
-        require('telescope.previewers.buffer_previewer').set_colorize_lines = function()
-          return
-        end
-      end)
+      local extensions = { 'fzf', 'ui-select', 'frecency', 'file_browser' }
+      for _, ext in ipairs(extensions) do
+        pcall(function() telescope.load_extension(ext) end)
+      end
 
       -- Smart file search function: git_files (fast) first, then find_files as fallback
       local function project_files()
-        local opts = { previewer = dummy_previewer }
-        local ok = pcall(require('telescope.builtin').git_files, opts)
+        local ok = pcall(require('telescope.builtin').git_files)
         if not ok then
-          require('telescope.builtin').find_files(opts)
+          require('telescope.builtin').find_files()
         end
       end
 
-      -- Optimized file search mappings
+      -- Optimized file search mappings - removed redundant previewer configs
       map('n', '<leader>p', project_files, { desc = "Project files (git first)" })
-      map('n', '<leader>f', function() require('telescope.builtin').find_files({ previewer = dummy_previewer }) end, { desc = "Find files" })
-      map('n', '<leader>r', function() require('telescope.builtin').frecency({ previewer = dummy_previewer }) end, { desc = "Recent files" })
-      map('n', '<leader>b', function() require('telescope.builtin').buffers({ previewer = dummy_previewer }) end, { desc = "Buffers" })
-      map('n', '<leader>s', function() require('telescope.builtin').live_grep({ previewer = dummy_previewer }) end, { desc = "Search text" })
-      map('n', '<leader>w', function() require('telescope.builtin').grep_string({ previewer = dummy_previewer }) end, { desc = "Search word" })
-      map('n', '<leader>/', function() require('telescope.builtin').current_buffer_fuzzy_find({ previewer = dummy_previewer }) end, { desc = "Search in buffer" })
-      map('n', '<leader>.', function() require('telescope.builtin').file_browser({ previewer = dummy_previewer }) end, { desc = "File browser" })
-      map('n', '<leader>cs', function() require('telescope.builtin').lsp_document_symbols({ previewer = dummy_previewer }) end, { desc = "Document symbols" })
-      map('n', '<leader>cS', function() require('telescope.builtin').lsp_workspace_symbols({ previewer = dummy_previewer }) end, { desc = "Workspace symbols" })
-      map('n', '<leader>cr', function() require('telescope.builtin').lsp_references({ previewer = dummy_previewer }) end, { desc = "References" })
-      map('n', '<leader>cd', function() require('telescope.builtin').diagnostics({ previewer = dummy_previewer }) end, { desc = "Diagnostics" })
-      map('n', '<leader>gs', function() require('telescope.builtin').git_status({ previewer = dummy_previewer }) end, { desc = "Git status" })
-      map('n', '<leader>gc', function() require('telescope.builtin').git_commits({ previewer = dummy_previewer }) end, { desc = "Git commits" })
-      map('n', '<leader>gb', function() require('telescope.builtin').git_branches({ previewer = dummy_previewer }) end, { desc = "Git branches" })
+      map('n', '<leader>f', function() require('telescope.builtin').find_files() end, { desc = "Find files" })
+      map('n', '<leader>r', function() require('telescope.builtin').frecency() end, { desc = "Recent files" })
+      map('n', '<leader>b', function() require('telescope.builtin').buffers() end, { desc = "Buffers" })
+      map('n', '<leader>s', function() require('telescope.builtin').live_grep() end, { desc = "Search text" })
+      map('n', '<leader>w', function() require('telescope.builtin').grep_string() end, { desc = "Search word" })
+      map('n', '<leader>/', function() require('telescope.builtin').current_buffer_fuzzy_find() end,
+        { desc = "Search in buffer" })
+      map('n', '<leader>.', function() require('telescope.builtin').file_browser() end, { desc = "File browser" })
+      map('n', '<leader>cs', function() require('telescope.builtin').lsp_document_symbols() end,
+        { desc = "Document symbols" })
+      map('n', '<leader>cS', function() require('telescope.builtin').lsp_workspace_symbols() end,
+        { desc = "Workspace symbols" })
+      map('n', '<leader>cr', function() require('telescope.builtin').lsp_references() end, { desc = "References" })
+      map('n', '<leader>cd', function() require('telescope.builtin').diagnostics() end, { desc = "Diagnostics" })
+      map('n', '<leader>gs', function() require('telescope.builtin').git_status() end, { desc = "Git status" })
+      map('n', '<leader>gc', function() require('telescope.builtin').git_commits() end, { desc = "Git commits" })
+      map('n', '<leader>gb', function() require('telescope.builtin').git_branches() end, { desc = "Git branches" })
 
       -- Cache clearing command
       vim.api.nvim_create_user_command("TelescopeCacheClear", function()
@@ -478,6 +498,8 @@ require("lazy").setup({
   -- Terminal
   {
     "akinsho/toggleterm.nvim",
+    keys = { "<c-\\>", "<leader>t", "<leader>th", "<leader>tv" }, -- Lazy-load on keys
+    cmd = "ToggleTerm",                                           -- Lazy-load on command
     config = function()
       require("toggleterm").setup({
         size = function(term)
@@ -514,6 +536,7 @@ require("lazy").setup({
   -- Git integration
   {
     "lewis6991/gitsigns.nvim",
+    event = "BufReadPre", -- Lazy-load when reading a file
     config = function()
       require("gitsigns").setup({
         current_line_blame = true,
@@ -557,6 +580,8 @@ require("lazy").setup({
   {
     "sindrets/diffview.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
+    cmd = { "DiffviewOpen", "DiffviewFileHistory" },                       -- Lazy-load on commands
+    keys = { "<leader>gvd", "<leader>gvs", "<leader>gvf", "<leader>gvb" }, -- Lazy-load on keys
     config = function()
       require("diffview").setup({
         enhanced_diff_hl = true,
@@ -579,7 +604,11 @@ require("lazy").setup({
   },
 
   -- Fugitive for Git
-  { "tpope/vim-fugitive", dependencies = { "tpope/vim-rhubarb" } },
+  {
+    "tpope/vim-fugitive",
+    dependencies = { "tpope/vim-rhubarb" },
+    cmd = { "Git", "Gread", "Gwrite", "Gdiffsplit", "Gvdiffsplit" }, -- Lazy-load on commands
+  },
 
   -- Debugging
   {
@@ -589,6 +618,10 @@ require("lazy").setup({
       "leoluz/nvim-dap-go",
       "rcarriga/nvim-dap-ui",
       "theHamsta/nvim-dap-virtual-text",
+    },
+    keys = { -- Lazy-load on keys
+      "<F5>", "<F10>", "<F11>", "<F12>",
+      "<Leader>db", "<Leader>dB", "<Leader>du", "<leader>dd"
     },
     config = function()
       require("dap-go").setup()
@@ -664,6 +697,7 @@ require("lazy").setup({
   {
     "nvim-lualine/lualine.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
+    event = "VimEnter", -- Lazy-load on vim enter
     config = function()
       require("lualine").setup({
         options = {
@@ -676,24 +710,26 @@ require("lazy").setup({
     end
   },
 
-  -- Error display - Modified to auto-open
+  -- Error display - Simplified configuration
   {
     "folke/trouble.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
+    cmd = "TroubleToggle",                               -- Lazy-load on command
+    keys = { "<leader>xx", "<leader>xd", "<leader>xw" }, -- Lazy-load on keys
     config = function()
       require("trouble").setup({
         position = "bottom",
-        height = 12,        -- Slightly shorter to leave more room for code
+        height = 12,
         padding = false,
-        auto_open = false,  -- FIX: Disable auto_open globally
-        auto_close = false, -- Don't auto-close
+        auto_open = false, -- Explicitly disable auto_open
+        auto_close = false,
         auto_preview = true,
         mode = "workspace_diagnostics",
       })
 
-      map("n", "<leader>xx", "<cmd>TroubleToggle<cr>", { silent = true, noremap = true })
-      map("n", "<leader>xd", "<cmd>Trouble diagnostics toggle<cr>", { silent = true, noremap = true })
-      map("n", "<leader>xw", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", { silent = true, noremap = true })
+      map("n", "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", { silent = true, noremap = true })
+      map("n", "<leader>xd", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", { silent = true, noremap = true })
+      map("n", "<leader>xw", "<cmd>Trouble symbols toggle focus=false<cr>", { silent = true, noremap = true })
     end
   },
 
@@ -705,6 +741,7 @@ require("lazy").setup({
       "neovim/nvim-lspconfig",
       "nvim-treesitter/nvim-treesitter",
     },
+    ft = "go", -- Lazy-load on Go files only
     config = function()
       require("go").setup({
         goimports = true,
@@ -730,17 +767,13 @@ require("lazy").setup({
   -- Auto pairs
   {
     "windwp/nvim-autopairs",
+    event = "InsertEnter", -- Only load when entering insert mode
     config = function()
       require("nvim-autopairs").setup({
         disable_filetype = { "TelescopePrompt" },
         check_ts = true,
         fast_wrap = { map = '<M-e>' },
       })
-
-      -- Connect to cmp
-      local cmp_autopairs = require('nvim-autopairs.completion.cmp')
-      local cmp = require('cmp')
-      cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
     end
   },
 
@@ -749,6 +782,7 @@ require("lazy").setup({
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
     dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" },
+    event = { "BufReadPost", "BufNewFile" }, -- Load when buffer is read/created
     config = function()
       require("nvim-treesitter.configs").setup({
         ensure_installed = { 'go', 'lua', 'markdown', 'yaml', 'json', 'sql', 'bash' },
@@ -796,6 +830,7 @@ require("lazy").setup({
   -- Comments
   {
     "numToStr/Comment.nvim",
+    event = "BufReadPost", -- Lazy-load after buffer is read
     config = function()
       require("Comment").setup()
     end
@@ -805,6 +840,7 @@ require("lazy").setup({
   {
     "lukas-reineke/indent-blankline.nvim",
     main = "ibl",
+    event = "BufReadPost", -- Lazy-load after buffer is read
     config = function()
       require("ibl").setup({
         indent = { char = "│" },
@@ -816,6 +852,7 @@ require("lazy").setup({
   -- Which-key for keybinding help
   {
     "folke/which-key.nvim",
+    event = "VeryLazy", -- Load this after everything else
     config = function()
       require("which-key").setup()
     end
@@ -837,6 +874,7 @@ require("lazy").setup({
       "saadparwaiz1/cmp_luasnip",
       "rafamadriz/friendly-snippets",
     },
+    event = { "BufReadPre", "BufNewFile" }, -- Load LSP for real files
     config = function()
       -- Set up LSP
       require("neodev").setup()
@@ -859,7 +897,7 @@ require("lazy").setup({
         vim.keymap.set('n', '<leader>D', vim.lsp.buf.type_definition, opts)
         vim.keymap.set('n', '<leader>fs', vim.lsp.buf.document_symbol, opts)
         vim.keymap.set('n', '<leader>ff', function() vim.lsp.buf.format({ async = true }) end, opts)
-        
+
         -- Add tag navigation replacement using LSP
         vim.keymap.set('n', '<C-]>', vim.lsp.buf.definition, opts)
         vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
@@ -1031,146 +1069,11 @@ require("lazy").setup({
           luasnip.insert_node(1, "return err"),
           luasnip.text_node({ "", "}" })
         }),
-
-        -- More Go snippets...
       })
+
+      -- Connect autopairs to cmp for optimal use
+      local cmp_autopairs = require('nvim-autopairs.completion.cmp')
+      cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
     end
   },
-})
-
--- Additional keymaps
--- Window navigation
-map('n', '<C-h>', '<C-w>h')
-map('n', '<C-j>', '<C-w>j')
-map('n', '<C-k>', '<C-w>k')
-map('n', '<C-l>', '<C-w>l')
-
--- Resize window with Alt+arrows
-map('n', '<M-Up>', ':resize -2<CR>', { silent = true })
-map('n', '<M-Down>', ':resize +2<CR>', { silent = true })
-map('n', '<M-Left>', ':vertical resize -2<CR>', { silent = true })
-map('n', '<M-Right>', ':vertical resize +2<CR>', { silent = true })
-
--- Buffer navigation
-map('n', '<Tab>', ':bnext<CR>', { silent = true })
-map('n', '<S-Tab>', ':bprevious<CR>', { silent = true })
-map('n', '<leader>x', ':bdelete<CR>', { silent = true, desc = "Close buffer" })
-
--- Better indenting
-map('v', '<', '<gv')
-map('v', '>', '>gv')
-
--- Move text up and down
-map('v', '<A-j>', ":m '>+1<CR>gv=gv")
-map('v', '<A-k>', ":m '<-2<CR>gv=gv")
-
--- Better visual mode paste
-map('v', 'p', '"_dP')
-
--- Better searching
-map('n', '<Esc>', ':nohlsearch<CR>', { silent = true, desc = "Clear highlights" })
-
--- Diagnostics configuration
-vim.diagnostic.config({
-  virtual_text = true,
-  signs = true,
-  underline = true,
-  update_in_insert = false,
-  severity_sort = true,
-  float = {
-    border = 'rounded',
-    source = true,
-    header = '',
-    prefix = '',
-  },
-})
-
--- Set diagnostic icons
-local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
-for type, icon in pairs(signs) do
-  local hl = "DiagnosticSign" .. type
-  vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-end
-
--- Set up ideal layout on startup
-vim.api.nvim_create_autocmd({ "VimEnter" }, {
-  callback = function()
-    -- Open NvimTree
-    vim.cmd("NvimTreeToggle")
-
-    -- Wait for LSP to start before opening Symbols Outline
-    vim.defer_fn(function()
-      vim.cmd("SymbolsOutline")
-
-      -- Adjust layout proportionally
-      vim.defer_fn(function()
-        -- FIX: Use directional navigation instead of numbered windows
-        vim.cmd("wincmd h") -- Go to leftmost window (NvimTree)  
-        vim.cmd("vertical resize 40")
-        
-        vim.cmd("wincmd l") -- Go to main editor
-        
-        vim.cmd("wincmd l") -- Go to rightmost window (Symbols Outline)
-        vim.cmd("vertical resize 35")
-        
-        vim.cmd("wincmd h") -- Return to main editor
-      end, 100)
-    end, 800) -- Wait longer for LSP to initialize
-  end,
-})
-
--- Add a command to restore this layout if it gets disrupted
-vim.api.nvim_create_user_command("RestoreLayout", function()
-  -- If NvimTree isn't open, open it
-  if vim.fn.bufwinnr("NvimTree") == -1 then
-    vim.cmd("NvimTreeToggle")
-  end
-
-  -- If Symbols Outline isn't open, open it
-  if vim.fn.bufwinnr("OUTLINE") == -1 then
-    vim.cmd("SymbolsOutline")
-  end
-
-  -- If Trouble isn't open, open it
-  if vim.fn.bufwinnr("Trouble") == -1 then
-    vim.cmd("Trouble")
-  end
-
-  -- Adjust the layout
-  vim.defer_fn(function()
-    -- FIX: Use directional navigation instead of numbered windows
-    vim.cmd("wincmd h") -- Go to leftmost window (NvimTree)
-    vim.cmd("vertical resize 40")
-    
-    vim.cmd("wincmd l") -- Go to main editor
-    
-    vim.cmd("wincmd l") -- Go to rightmost window (Symbols Outline)
-    vim.cmd("vertical resize 35")
-    
-    vim.cmd("wincmd h") -- Return to main editor
-  end, 100)
-end, { desc = "Restore IDE-like window layout" })
-
--- Map it to a key for easy access
-map('n', '<leader>ll', ':RestoreLayout<CR>', { silent = true, desc = "Restore window layout" })
-
--- Print a startup message and ensure NvimTree is open
-vim.api.nvim_create_autocmd({ "VimEnter" }, {
-  callback = function()
-    vim.notify("Neovim configuration loaded successfully with Lazy.nvim!", vim.log.levels.INFO)
-    
-    -- Open NvimTree when starting Neovim (replaces deprecated open_on_setup option)
-    local args = vim.fn.argv()
-    -- Only open nvim-tree if we're in a directory or have no args
-    if #args > 0 and vim.fn.isdirectory(args[1]) > 0 or #args == 0 then
-      vim.cmd("NvimTreeToggle")
-    end
-    
-    -- Ensure NvimTree is open after startup in all cases
-    vim.defer_fn(function() 
-      if vim.fn.bufwinnr("NvimTree") == -1 then
-        vim.cmd("NvimTreeToggle") 
-      end
-    end, 100)
-  end,
 })
