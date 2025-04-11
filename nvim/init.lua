@@ -859,6 +859,11 @@ require("lazy").setup({
         vim.keymap.set('n', '<leader>D', vim.lsp.buf.type_definition, opts)
         vim.keymap.set('n', '<leader>fs', vim.lsp.buf.document_symbol, opts)
         vim.keymap.set('n', '<leader>ff', function() vim.lsp.buf.format({ async = true }) end, opts)
+        
+        -- Add tag navigation replacement using LSP
+        vim.keymap.set('n', '<C-]>', vim.lsp.buf.definition, opts)
+        vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+        vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
 
         -- Diagnostic keymaps
         vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
