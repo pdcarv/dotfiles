@@ -80,54 +80,60 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
   -- Theme
   {
-    "folke/tokyonight.nvim",
+    "shaunsingh/nord.nvim",
     lazy = false,
     priority = 1000,
     config = function()
-      require("tokyonight").setup({
-        style = "night",
-        on_colors = function(colors)
-          colors.blue = "#7aa2f7" -- Slightly warmer blue
-          colors.cyan = "#7dcfff" -- Slightly warmer cyan
-        end,
-        on_highlights = function(highlights, colors)
-          highlights.Comment = { fg = "#737aa2" }
-          highlights.CursorLine = { bg = "#292e42" }
-          highlights.LineNr = { fg = "#3b4261" }
-          highlights.CursorLineNr = { fg = "#737aa2" }
-        end,
-        terminal_colors = true,
-        styles = {
-          comments = { italic = true },
-          keywords = { italic = true },
-        },
-        dim_inactive = true,
-        lualine_bold = true,
-      })
-      vim.cmd("colorscheme tokyonight-night")
+      -- Eye comfort optimizations
+      vim.g.nord_contrast = true
+      vim.g.nord_borders = true
+      vim.g.nord_italic = false
+      vim.g.nord_bold = true
+
+      -- Default colorscheme (fallback if auto-dark-mode fails)
+      vim.cmd("colorscheme nord")
     end
   },
 
-  -- macOS System Appearance Detection
+  -- Auto Dark Mode
   {
     "f-person/auto-dark-mode.nvim",
-    event = "VimEnter", -- Lazy-load on VimEnter
+    event = "VimEnter",
     config = function()
-      require("auto-dark-mode").setup({
+      local ok, auto_dark_mode = pcall(require, "auto-dark-mode")
+      if not ok then
+        vim.notify("auto-dark-mode plugin not found. Run :Lazy sync", vim.log.levels.WARN)
+        return
+      end
+
+      auto_dark_mode.setup({
         update_interval = 1000,
         set_dark_mode = function()
-          vim.cmd('colorscheme tokyonight-night')
-          vim.api.nvim_set_option('background', 'dark')
+          vim.cmd("colorscheme nord")
+          vim.o.background = "dark"
+
+          -- Enhanced visibility for dark mode
+          vim.cmd[[highlight Normal guibg=#2E3440]]
+          vim.cmd[[highlight Comment gui=NONE guifg=#81A1C1]]
+          vim.cmd[[highlight DiagnosticError guifg=#BF616A gui=bold]]
+          vim.cmd[[highlight DiagnosticWarn guifg=#EBCB8B gui=bold]]
+          vim.cmd[[highlight NvimTreeFolderIcon guifg=#EBCB8B]]
         end,
         set_light_mode = function()
-          vim.cmd('colorscheme tokyonight-day')
-          vim.api.nvim_set_option('background', 'light')
+          vim.cmd("colorscheme nord")
+          vim.o.background = "light"
+
+          -- Enhanced visibility for light mode
+          vim.cmd[[highlight Normal guibg=#ECEFF4 guifg=#2E3440]]
+          vim.cmd[[highlight Comment gui=NONE guifg=#5E81AC]]
+          vim.cmd[[highlight DiagnosticError guifg=#BF616A gui=bold]]
+          vim.cmd[[highlight NvimTreeFolderIcon guifg=#5E81AC]]
         end,
       })
-      pcall(function() require("auto-dark-mode").init() end)
+
+      pcall(function() auto_dark_mode.init() end)
     end
   },
-
   -- Fast Navigation
   {
     "phaazon/hop.nvim",
@@ -631,26 +637,23 @@ require("lazy").setup({
       local dap = require("dap")
       local dapui = require("dapui")
 
+      dap.adapters.delve = {
+        type = 'server',
+        port = '${port}',
+        executable = {
+          command = 'dlv',
+          args = { 'dap', '-l', '127.0.0.1:${port}' },
+        }
+      }
+
       -- Configure Go debugging
       dap.configurations.go = {
         {
-          type = "go",
-          name = "Debug Current File",
-          request = "launch",
-          program = "${file}"
-        },
-        {
-          type = "go",
-          name = "Debug Package",
-          request = "launch",
-          program = "${fileDirname}"
-        },
-        {
-          type = "go",
+          type = "delve",
           name = "Debug Test",
           request = "launch",
           mode = "test",
-          program = "${file}"
+          program = "${fileDirname}"
         }
       }
 
@@ -701,7 +704,7 @@ require("lazy").setup({
     config = function()
       require("lualine").setup({
         options = {
-          theme = 'tokyonight',
+          theme = 'nord',
           component_separators = '|',
           section_separators = '',
           globalstatus = true,
@@ -899,13 +902,16 @@ require("lazy").setup({
         vim.keymap.set('n', '<leader>ff', function() vim.lsp.buf.format({ async = true }) end, opts)
 
         -- Add tag navigation replacement using LSP
-        vim.keymap.set('n', '<C-]>', vim.lsp.buf.definition, opts)
         vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
         vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
 
         -- Diagnostic keymaps
-        vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
-        vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
+        vim.keymap.set('n', '[d', function()
+          vim.diagnostic.jump({ backward = true, float = true })
+        end)
+        vim.keymap.set('n', ']d', function()
+          vim.diagnostic.jump({ forward = true, float = true })
+        end)
         vim.keymap.set('n', '<leader>dl', vim.diagnostic.setloclist, opts)
         vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, opts)
 
