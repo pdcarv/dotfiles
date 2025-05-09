@@ -31,7 +31,6 @@ Plug 'airblade/vim-gitgutter'    " Git changes in gutter
 
 " Color schemes
 Plug 'morhetz/gruvbox'
-Plug 'ghifarit53/tokyonight-vim'
 
 " macOS specific
 if has("unix")
@@ -120,15 +119,27 @@ set wildignore+=*.o,*~,*.pyc
 
 " Performance
 set ttyfast
-set shell=/usr/local/bin/zsh
 
-" Color scheme
-set termguicolors
+" Set the background to dark (for dark theme)
+set background=dark
 
-let g:tokyonight_style = 'night' " available: night, storm
-let g:tokyonight_enable_italic = 1
+" Set Gruvbox contrast to hard
+let g:gruvbox_contrast_dark = 'hard'
 
-colorscheme tokyonight
+" Set the colorscheme
+colorscheme gruvbox
+
+" Optional: enable termguicolors for better colors (if your terminal supports it)
+if has("termguicolors")
+    set termguicolors
+endif
+
+" Improve performance
+let g:gruvbox_improved_strings = 0
+let g:gruvbox_improved_warnings = 1
+
+" Highlight invert selection
+let g:gruvbox_invert_selection = 0
 
 " Start screen configuration
 let g:startify_lists = [

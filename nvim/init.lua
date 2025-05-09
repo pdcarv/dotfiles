@@ -80,60 +80,66 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
   -- Theme
   {
-    "shaunsingh/nord.nvim",
+    "ellisonleao/gruvbox.nvim",
     lazy = false,
     priority = 1000,
     config = function()
-      -- Eye comfort optimizations
-      vim.g.nord_contrast = true
-      vim.g.nord_borders = true
-      vim.g.nord_italic = false
-      vim.g.nord_bold = true
+      -- Configure Gruvbox base settings
+      require("gruvbox").setup({
+        contrast = "hard",
+        palette_overrides = {
+          dark0_hard = "#1d2021",  -- Darker background for night
+          light0_hard = "#f9f5d7", -- Lighter background for day
+        },
+        overrides = {
+          Comment = { italic = false },
+          ["@keyword"] = { italic = false },
+        },
+        dim_inactive = false,
+      })
 
-      -- Default colorscheme (fallback if auto-dark-mode fails)
-      vim.cmd("colorscheme nord")
+      -- Default to dark mode if auto-dark-mode fails
+      vim.o.background = "dark"
+      vim.cmd("colorscheme gruvbox")
     end
   },
 
-  -- Auto Dark Mode
   {
     "f-person/auto-dark-mode.nvim",
     event = "VimEnter",
     config = function()
       local ok, auto_dark_mode = pcall(require, "auto-dark-mode")
       if not ok then
-        vim.notify("auto-dark-mode plugin not found. Run :Lazy sync", vim.log.levels.WARN)
+        vim.notify("auto-dark-mode plugin not found. Run :Lazy sync to install.", vim.log.levels.WARN)
         return
       end
 
       auto_dark_mode.setup({
         update_interval = 1000,
         set_dark_mode = function()
-          vim.cmd("colorscheme nord")
           vim.o.background = "dark"
-
-          -- Enhanced visibility for dark mode
-          vim.cmd[[highlight Normal guibg=#2E3440]]
-          vim.cmd[[highlight Comment gui=NONE guifg=#81A1C1]]
-          vim.cmd[[highlight DiagnosticError guifg=#BF616A gui=bold]]
-          vim.cmd[[highlight DiagnosticWarn guifg=#EBCB8B gui=bold]]
-          vim.cmd[[highlight NvimTreeFolderIcon guifg=#EBCB8B]]
+          vim.cmd("colorscheme gruvbox")
+          -- Enhance visibility in dark mode
+          vim.cmd [[highlight DiagnosticError guifg=#fb4934 gui=bold]]
+          vim.cmd [[highlight DiagnosticWarn guifg=#fabd2f gui=bold]]
+          vim.cmd [[highlight NvimTreeFolderIcon guifg=#fabd2f]]
+          vim.cmd [[highlight DevIconDefault guifg=#d3869b]]
         end,
         set_light_mode = function()
-          vim.cmd("colorscheme nord")
           vim.o.background = "light"
-
-          -- Enhanced visibility for light mode
-          vim.cmd[[highlight Normal guibg=#ECEFF4 guifg=#2E3440]]
-          vim.cmd[[highlight Comment gui=NONE guifg=#5E81AC]]
-          vim.cmd[[highlight DiagnosticError guifg=#BF616A gui=bold]]
-          vim.cmd[[highlight NvimTreeFolderIcon guifg=#5E81AC]]
+          vim.cmd("colorscheme gruvbox")
+          -- Enhance visibility in light mode
+          vim.cmd [[highlight DiagnosticError guifg=#9d0006 gui=bold]]
+          vim.cmd [[highlight DiagnosticWarn guifg=#b57614 gui=bold]]
+          vim.cmd [[highlight NvimTreeFolderIcon guifg=#b57614]]
+          vim.cmd [[highlight DevIconDefault guifg=#8f3f71]]
         end,
       })
 
       pcall(function() auto_dark_mode.init() end)
     end
   },
+
   -- Fast Navigation
   {
     "phaazon/hop.nvim",
@@ -704,7 +710,7 @@ require("lazy").setup({
     config = function()
       require("lualine").setup({
         options = {
-          theme = 'nord',
+          theme = 'gruvbox',
           component_separators = '|',
           section_separators = '',
           globalstatus = true,
