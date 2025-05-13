@@ -7,8 +7,6 @@ fi
 # Increase function nesting limit to prevent errors with Starship
 FUNCNEST=2000
 
-# Spaceship prompt is completely disabled (this worked well in previous config)
-
 # Path to zsh configuration directory
 export ZSH=$HOME/.zsh
 
@@ -30,8 +28,6 @@ setopt AUTO_PUSHD
 setopt PUSHD_IGNORE_DUPS
 setopt PUSHD_SILENT
 
-# EXTREME optimization for completion system
-# This addresses the top bottlenecks: compdump, compinit, compdef
 autoload -Uz compinit
 # Check if cache exists and use it
 if [ -f "${ZDOTDIR:-$HOME}/.zcompdump" ]; then
@@ -136,7 +132,6 @@ if (( $+commands[fd] )); then
     alias find='fd'
 fi
 
-# Better ripgrep detection (fix "command not found: rg" error)
 if (( $+commands[rg] )); then
     # If the command is available as 'rg'
     alias grep='rg'
@@ -145,7 +140,6 @@ elif (( $+commands[ripgrep] )); then
     alias grep='ripgrep'
 fi
 
-# Ultra-lazy-loading for all development tools
 # Only load when explicitly called
 
 # Ruby environment
@@ -260,7 +254,6 @@ bindkey '^T' _fzf_file_wrapper
 bindkey '^[c' _fzf_cd_wrapper
 
 # Load configuration files from ~/.zsh/ directory
-# This is important for your custom configurations
 if [[ -d "$ZSH" ]]; then
   # Define priority files to load first (if they exist)
   priority_files=(
@@ -286,10 +279,7 @@ fi
 
 # Initialize Starship prompt with multiple detection methods
 # First, check if we've already confirmed Starship is installed in a previous session
-if [[ -f ~/.starship_installed ]] || command -v starship >/dev/null 2>&1 || [[ -x /usr/local/bin/starship ]] || [[ -x /opt/homebrew/bin/starship ]]; then
-  # Create flag file to skip detection in future sessions
-  touch ~/.starship_installed
-  
+if command -v starship >/dev/null 2>&1 || [[ -x /usr/local/bin/starship ]] || [[ -x /opt/homebrew/bin/starship ]]; then
   # Cache for better performance
   export STARSHIP_CACHE=~/.cache/starship
   mkdir -p $STARSHIP_CACHE
