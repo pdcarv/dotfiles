@@ -4,7 +4,8 @@ if [[ ! -f ~/.zshrc.zwc || ~/.zshrc -nt ~/.zshrc.zwc ]]; then
     zcompile ~/.zshrc
 fi
 
-FUNCNEST=1000
+# Increase function nesting limit to prevent errors with Starship
+FUNCNEST=2000
 
 # Spaceship prompt is completely disabled (this worked well in previous config)
 
