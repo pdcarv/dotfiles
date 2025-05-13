@@ -96,8 +96,6 @@
     rebase = true
     ff = only
 
-# New performance-optimized sections
-
 [pack]
     packSizeLimit = 512m
     windowMemory = 512m
