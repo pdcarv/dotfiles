@@ -20,12 +20,10 @@
     lgs = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --all -n 10
     brd = branch -d
     brD = branch -D
-
     sl = stash list
     ss = stash save
     sp = stash pop
     sa = stash apply
-
     gotest = "!gt() { go test ./... ${1:-.}; }; gt"
     gobuild = "!gb() { go build ./...; }; gb"
     review = diff --stat -p -w --patience
@@ -52,6 +50,13 @@
     pager = delta
     autocrlf = input
     whitespace = trailing-space,space-before-tab
+    # Performance optimizations
+    fscache = true
+    preloadindex = true
+    packedGitLimit = 512m
+    packedGitWindowSize = 512m
+    bigFileThreshold = 64m
+    deltaBaseCacheLimit = 2g
 
 [merge]
     summary = true
@@ -77,6 +82,9 @@
 
 [fetch]
     prune = true
+    # Performance optimizations
+    parallel = 4
+    recurseSubmodules = false
 
 [rerere]
     enabled = true
@@ -87,3 +95,34 @@
 [pull]
     rebase = true
     ff = only
+
+# New performance-optimized sections
+
+[pack]
+    packSizeLimit = 512m
+    windowMemory = 512m
+    threads = 4
+    deltaCacheSize = 256m
+
+[status]
+    showUntrackedFiles = normal
+
+[gc]
+    auto = 256
+    autoPackLimit = 64
+
+[feature]
+    manyFiles = true
+
+[delta]
+    features = side-by-side line-numbers decorations
+    max-line-length = 1024
+    syntax-theme = ansi
+    navigate = true
+    light = false
+
+[index]
+    version = 4
+
+[protocol]
+    version = 2
