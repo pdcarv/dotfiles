@@ -121,7 +121,7 @@ function complete-with-dots() {
 zle -N complete-with-dots
 bindkey "^I" complete-with-dots
 
-# Modern CLI tool alternatives - simple aliases
+# Modern CLI tool alternatives - with better command detection
 if (( $+commands[exa] )); then
     alias ls='exa'
     alias ll='exa -l'
@@ -136,8 +136,13 @@ if (( $+commands[fd] )); then
     alias find='fd'
 fi
 
-if (( $+commands[ripgrep] || $+commands[rg] )); then
+# Better ripgrep detection (fix "command not found: rg" error)
+if (( $+commands[rg] )); then
+    # If the command is available as 'rg'
     alias grep='rg'
+elif (( $+commands[ripgrep] )); then
+    # If it's available as 'ripgrep'
+    alias grep='ripgrep'
 fi
 
 # Ultra-lazy-loading for all development tools
@@ -199,29 +204,19 @@ pyenv() {
   pyenv "$@"
 }
 
-# Atuin - restore original behavior but with optimization
+# Atuin - simplified for reliability
 if (( $+commands[atuin] )); then
-    # Keep this setting to prevent unwanted keybindings
+    # Tell Atuin not to set up its own keybindings
     export ATUIN_NOBIND="true"
     
-    # Use a function to initialize Atuin only on first keypress
-    _atuin_init_and_search() {
-        # Remove this function after it's used once
-        unfunction _atuin_init_and_search
-        
-        # Initialize Atuin as in original config
-        eval "$(atuin init zsh)"
-        
-        # Bind Ctrl-R to the Atuin search widget directly as in original
-        bindkey '^r' _atuin_search_widget
-        
-        # Forward this keypress to the now-bound widget
-        zle _atuin_search_widget
-    }
+    # Initialize Atuin directly (not lazy-loaded)
+    eval "$(atuin init zsh --disable-up-arrow)"
     
-    # Bind Ctrl-R to our initialization function initially
-    zle -N _atuin_init_and_search
-    bindkey '^r' _atuin_init_and_search
+    # Explicitly bind Ctrl+R to Atuin's search widget
+    bindkey '^r' _atuin_search_widget
+else
+    # Traditional history search if Atuin is not available
+    bindkey '^r' history-incremental-search-backward
 fi
 
 # FZF Configuration - closer to original but with delayed loading
@@ -313,9 +308,3 @@ else
   fi
 fi
 
-# Benchmark function
-zsh-bench() {
-  for i in $(seq 1 5); do
-    time (zsh -i -c exit)
-  done
-}
