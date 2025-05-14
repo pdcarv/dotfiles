@@ -1,5 +1,7 @@
 # Load local config if it exists
-[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local# Performance optimization - zshrc compilation
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+
+# Performance optimization - zshrc compilation
 if [[ ! -f ~/.zshrc.zwc || ~/.zshrc -nt ~/.zshrc.zwc ]]; then
     zcompile ~/.zshrc
 fi
@@ -89,6 +91,11 @@ export KEYTIMEOUT=1
 # Essential keybindings only - keep to absolute minimum
 bindkey '^a' beginning-of-line
 bindkey '^e' end-of-line
+
+# Add vi-mode specific history search bindings
+bindkey -M viins '^k' up-line-or-search     # Search history up with Ctrl+K
+bindkey -M viins '^j' down-line-or-search   # Search history down with Ctrl+J
+bindkey -M isearch '^e' accept-search       # Accept search with Ctrl+E during search
 
 # Lazy-load all completion on first tab press
 function load-completion-system() {
@@ -198,7 +205,7 @@ pyenv() {
   pyenv "$@"
 }
 
-# Atuin - simplified for reliability
+# Atuin - improved widget detection and fallback chain
 if (( $+commands[atuin] )); then
     # Tell Atuin not to set up its own keybindings
     export ATUIN_NOBIND="true"
@@ -206,14 +213,33 @@ if (( $+commands[atuin] )); then
     # Initialize Atuin directly (not lazy-loaded)
     eval "$(atuin init zsh --disable-up-arrow)"
     
-    # Explicitly bind Ctrl+R to Atuin's search widget
-    bindkey '^r' _atuin_search_widget
+    # Get the actual Atuin widget name (more robust)
+    local atuin_widget_name
+    for widget in ${(k)widgets}; do
+        if [[ $widget == *atuin*search* ]]; then
+            atuin_widget_name=$widget
+            break
+        fi
+    done
+    
+    # Bind Ctrl+R to Atuin's search widget if found
+    if [[ -n "$atuin_widget_name" ]]; then
+        bindkey '^r' $atuin_widget_name
+    else
+        # Fallback in case widget not found
+        bindkey '^r' history-incremental-search-backward
+    fi
 else
-    # Traditional history search if Atuin is not available
-    bindkey '^r' history-incremental-search-backward
+    # FZF history search if Atuin isn't available
+    if [[ -f ~/.fzf.zsh ]]; then
+        bindkey '^r' _fzf_history_wrapper
+    else
+        # Traditional history search as last resort
+        bindkey '^r' history-incremental-search-backward
+    fi
 fi
 
-# FZF Configuration - closer to original but with delayed loading
+# FZF Configuration - with context-specific settings
 _fzf_init_and_run() {
     # Which widget should we run after init
     local widget_to_run="$1"
@@ -221,9 +247,22 @@ _fzf_init_and_run() {
     # Initialize FZF if not already done
     if [[ -f ~/.fzf.zsh ]] && [[ -z "$FZF_INITIALIZED" ]]; then
         export FZF_INITIALIZED=1
-        export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --preview 'bat --style=numbers --color=always {}'"
+        
+        # Common options without preview (simpler, works everywhere)
+        export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border"
+        
+        # File-specific settings
         export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
         export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+        
+        # Only use preview for file operations if bat exists
+        if (( $+commands[bat] )); then
+            # Context-specific options
+            export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always {}'"
+        fi
+        
+        # History-specific settings - no preview, optimized for commands
+        export FZF_CTRL_R_OPTS="--no-preview"
         
         # Source FZF but don't disable its keybindings (to match original)
         source ~/.fzf.zsh
@@ -297,4 +336,3 @@ else
     echo "If Starship is already installed but not being detected, run: touch ~/.starship_installed"
   fi
 fi
-
