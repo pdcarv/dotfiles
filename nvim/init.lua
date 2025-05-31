@@ -1,5 +1,3 @@
--- Tokyo Night Neovim Configuration with Lazy.nvim
-
 -- Initial Setup
 vim.g.mapleader = " " -- Set leader key before loading plugins
 
@@ -35,7 +33,6 @@ vim.opt.colorcolumn = "100"
 vim.opt.completeopt = "menu,menuone,noselect"
 vim.opt.cmdheight = 2
 vim.opt.history = 1000
--- Fix: Remove duplicate linespace setting
 vim.opt.linespace = 4
 vim.opt.guifont = "JetBrains Mono:h14"
 
@@ -72,9 +69,6 @@ if not vim.loop.fs_stat(lazypath) then
   })
 end
 vim.opt.rtp:prepend(lazypath)
-
--- We'll define telescope previewer function inside the telescope config
--- to avoid requiring the module before it's loaded
 
 -- Plugin specification
 require("lazy").setup({
@@ -370,14 +364,6 @@ require("lazy").setup({
     config = function()
       local telescope = require("telescope")
 
-      -- Create a no-op previewer definition
-      local no_preview = function()
-        local previewers = require("telescope.previewers")
-        return previewers.new_buffer_previewer({
-          define_preview = function() return end
-        })
-      end
-
       telescope.setup({
         defaults = {
           -- Disable previews for performance
@@ -479,7 +465,7 @@ require("lazy").setup({
         end
       end
 
-      -- Optimized file search mappings - removed redundant previewer configs
+      -- Optimized file search mappings
       map('n', '<leader>p', project_files, { desc = "Project files (git first)" })
       map('n', '<leader>f', function() require('telescope.builtin').find_files() end, { desc = "Find files" })
       map('n', '<leader>r', function() require('telescope.builtin').frecency() end, { desc = "Recent files" })
@@ -742,7 +728,6 @@ require("lazy").setup({
     end
   },
 
-  -- Go development
   {
     "ray-x/go.nvim",
     dependencies = {
@@ -762,6 +747,18 @@ require("lazy").setup({
         lsp_gofumpt = true,
         lsp_on_attach = false,
         dap_debug = true,
+        trouble = true,
+        luasnip = true,
+        icons = { breakpoint = '🛑', currentpos = '▶️' },
+        lsp_codelens = true,
+        lsp_keymaps = false, -- We'll define our own
+        diagnostic = {
+          hdlr = true,
+          underline = true,
+          virtual_text = { space = 0, prefix = "■" },
+          signs = true,
+          update_in_insert = false,
+        },
       })
 
       map('n', '<leader>gt', '<cmd>GoTest -v<CR>', { noremap = true, desc = "Go test" })
@@ -770,6 +767,63 @@ require("lazy").setup({
       map('n', '<leader>gI', '<cmd>GoImports<CR>', { noremap = true, desc = "Go imports" })
       map('n', '<leader>gF', '<cmd>GoFormat<CR>', { noremap = true, desc = "Go format" })
       map('n', '<leader>gr', '<cmd>GoRun<CR>', { noremap = true, desc = "Go run" })
+
+      map('n', '<leader>gat', '<cmd>GoAddTag<CR>', { noremap = true, desc = "Go add tags" })
+      map('n', '<leader>grt', '<cmd>GoRmTag<CR>', { noremap = true, desc = "Go remove tags" })
+      map('n', '<leader>gfs', '<cmd>GoFillStruct<CR>', { noremap = true, desc = "Go fill struct" })
+      map('n', '<leader>gfs', '<cmd>GoFillSwitch<CR>', { noremap = true, desc = "Go fill switch" })
+      map('n', '<leader>gif', '<cmd>GoIfErr<CR>', { noremap = true, desc = "Go if err" })
+      map('n', '<leader>gim', '<cmd>GoImpl<CR>', { noremap = true, desc = "Go implement interface" })
+    end
+  },
+
+  {
+    "ray-x/navigator.lua",
+    dependencies = {
+      "ray-x/guihua.lua",
+      "neovim/nvim-lspconfig"
+    },
+    ft = "go",
+    config = function()
+      require("navigator").setup({
+        debug = false,
+        width = 0.75,
+        height = 0.3,
+        preview_height = 0.35,
+        border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
+        on_attach = function(client, bufnr)
+          -- Enhanced navigation for large codebases
+        end,
+        treesitter_analysis = true,
+        transparency = 10,
+        lsp_signature_help = true,
+        signature_help_cfg = { max_width = 80 },
+        lsp = {
+          enable = true,
+          code_action = { enable = true, sign = true, virtual_text = true },
+          code_lens_action = { enable = true, sign = true, virtual_text = true },
+          format_on_save = false,           -- We handle this separately
+          disable_format_cap = { "gopls" }, -- Prevent conflicts
+        },
+      })
+    end
+  },
+
+  
+  {
+    "crusj/structrue-go.nvim",
+    ft = "go",
+    config = function()
+      require("structrue-go").setup({
+        show_filename = true,
+        show_struct_field_line = true,
+        number = true,
+        fold = {
+          augroup_name = "StructrueGo",
+          enable = true,
+        },
+      })
+      map('n', '<leader>gst', '<cmd>GoStructure<CR>', { noremap = true, desc = "Go structure view" })
     end
   },
 
@@ -882,6 +936,7 @@ require("lazy").setup({
       "L3MON4D3/LuaSnip",
       "saadparwaiz1/cmp_luasnip",
       "rafamadriz/friendly-snippets",
+      "nvim-tree/nvim-web-devicons",        -- For completion icons
     },
     event = { "BufReadPre", "BufNewFile" }, -- Load LSP for real files
     config = function()
@@ -933,13 +988,14 @@ require("lazy").setup({
         end
       end
 
-      -- Gopls setup
+      
       require('lspconfig').gopls.setup({
         capabilities = capabilities,
         cmd = { "gopls" },
         filetypes = { "go", "gomod", "gowork", "gotmpl" },
         settings = {
           gopls = {
+            -- Enhanced completion and analysis
             analyses = {
               unusedparams = true,
               shadow = true,
@@ -947,13 +1003,54 @@ require("lazy").setup({
               unusedwrite = true,
               useany = true,
               unusedvariable = true,
+              
+              composites = true,    -- Composite literal improvements
+              ST1003 = true,        -- Go naming conventions
+              printf = true,        -- Printf format string analysis
+              httpresponse = true,  -- HTTP response body usage
+              stringintconv = true, -- String-int conversion analysis
             },
             staticcheck = true,
             gofumpt = true,
             usePlaceholders = true,
             completeUnimported = true,
             experimentalPostfixCompletions = true,
-            semanticTokens = false
+            semanticTokens = false,
+
+            
+            completionDocumentation = true,
+            deepCompletion = true,
+            matcher = "Fuzzy",
+            completionBudget = "100ms",
+
+            
+            codelenses = {
+              gc_details = true,         -- Memory allocation details
+              generate = true,           -- go generate commands
+              regenerate_cgo = true,     -- CGO regeneration
+              test = true,               -- Test run/debug buttons
+              tidy = true,               -- go mod tidy suggestions
+              upgrade_dependency = true, -- Dependency updates
+              vendor = true,             -- Vendor management
+            },
+
+            
+            hints = {
+              assignVariableTypes = true,
+              compositeLiteralFields = true,
+              compositeLiteralTypes = true,
+              constantValues = true,
+              functionTypeParameters = true,
+              parameterNames = true,
+              rangeVariableTypes = true,
+            },
+
+            
+            vulncheck = "Imports",           -- Vulnerability checking
+            templateExtensions = {},         -- Template file extensions
+            env = {
+              GOFLAGS = "-tags=integration", -- Build tags for completion
+            },
           },
         },
         on_attach = function(client, bufnr)
@@ -998,95 +1095,818 @@ require("lazy").setup({
         },
       })
 
-      -- Completion setup
+     -- Performance-Optimized Completion Engine with Advanced Snippets
       local cmp = require('cmp')
       local luasnip = require('luasnip')
 
-      local has_words_before = function()
-        local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-        return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
+      -- Helper functions for snippet conditions
+      local function in_function()
+        local node = vim.treesitter.get_node()
+        while node do
+          if node:type() == "function_declaration" or node:type() == "method_declaration" then
+            return true
+          end
+          node = node:parent()
+        end
+        return false
       end
 
+      local function in_test_function()
+        local node = vim.treesitter.get_node()
+        while node do
+          if node:type() == "function_declaration" then
+            local name_nodes = node:field("name")
+            if name_nodes and #name_nodes > 0 then
+              local name = vim.treesitter.get_node_text(name_nodes[1], 0)
+              return name:match("^Test") or name:match("^Benchmark") or name:match("^Example")
+            end
+          end
+          node = node:parent()
+        end
+        return false
+      end
+
+      local function at_line_start()
+        local line = vim.api.nvim_get_current_line()
+        local col = vim.api.nvim_win_get_cursor(0)[2]
+        return line:sub(1, col):match("^%s*$") ~= nil
+      end
+
+      -- Enhanced LuaSnip configuration for advanced snippet management
+      luasnip.config.set_config({
+        history = true,
+        updateevents = "TextChanged,TextChangedI",
+        enable_autosnippets = false, -- Manual control
+        store_selection_keys = "<Tab>",
+        -- Performance optimization for large files
+        ext_opts = {
+          [require("luasnip.util.types").choiceNode] = {
+            active = {
+              virt_text = { { "●", "Orange" } }
+            }
+          }
+        },
+      })
+
+      -- Comprehensive Go snippet library focused on core constructs
+      local ls = require("luasnip")
+      local s = ls.snippet
+      local t = ls.text_node
+      local i = ls.insert_node
+      local c = ls.choice_node
+      local f = ls.function_node
+      local fmt = require("luasnip.extras.fmt").fmt
+
+      ls.add_snippets("go", {
+        -- Error Handling Patterns
+        s("iferr", {
+          t({ "if err != nil {", "\treturn err", "}" })
+        }),
+
+        s("errw", {
+          fmt([[
+if err != nil {{
+	return fmt.Errorf("{}: %w", err)
+}}]], {
+            i(1, "operation failed")
+          })
+        }),
+
+        s("errn", {
+          fmt([[
+if err != nil {{
+	return {}
+}}]], {
+            c(1, {
+              t("nil, err"),
+              t("err"),
+              t("false, err"),
+              t("0, err"),
+            })
+          })
+        }),
+
+        s("errc", {
+          fmt([[
+if err != nil {{
+	{}: {}
+	return {}
+}}]], {
+            c(1, {
+              t("log.Printf"),
+              t("log.Error"),
+              t("fmt.Printf"),
+            }),
+            i(2, "\"error: %v\", err"),
+            i(3, "err")
+          })
+        }),
+
+        -- Function and Method Declarations
+        s("fn", {
+          fmt([[
+func {}({}) {} {{
+	{}
+}}]], {
+            i(1, "name"),
+            i(2, ""),
+            c(3, {
+              t("error"),
+              t(""),
+              t("(error)"),
+              t("(int, error)"),
+              t("(bool, error)"),
+              t("(*Type, error)"),
+            }),
+            i(4, "// TODO: implement")
+          })
+        }),
+
+        s("met", {
+          fmt([[
+func ({}) {}({}) {} {{
+	{}
+}}]], {
+            i(1, "r *Receiver"),
+            i(2, "Method"),
+            i(3, ""),
+            c(4, {
+              t("error"),
+              t(""),
+              t("(error)"),
+              t("(int, error)"),
+              t("(bool, error)"),
+            }),
+            i(5, "// TODO: implement")
+          })
+        }),
+
+        s("init", {
+          fmt([[
+func init() {{
+	{}
+}}]], {
+            i(1, "// initialization code")
+          }),
+          condition = at_line_start
+        }),
+
+        -- Struct and Interface Definitions
+        s("st", {
+          fmt([[
+type {} struct {{
+	{}
+}}]], {
+            i(1, "Name"),
+            i(2, "Field string")
+          }),
+          condition = at_line_start
+        }),
+
+        s("in", {
+          fmt([[
+type {} interface {{
+	{}
+}}]], {
+            i(1, "Name"),
+            i(2, "Method() error")
+          }),
+          condition = at_line_start
+        }),
+
+        -- Control Flow Constructs
+        s("for", {
+          fmt([[
+for {} {{
+	{}
+}}]], {
+            c(1, {
+              t("i := 0; i < n; i++"),
+              t("condition"),
+              t(""),
+            }),
+            i(2, "// loop body")
+          })
+        }),
+
+        s("forr", {
+          fmt([[
+for {}, {} := range {} {{
+	{}
+}}]], {
+            i(1, "i"),
+            i(2, "v"),
+            i(3, "slice"),
+            i(4, "// range body")
+          })
+        }),
+
+        s("sw", {
+          fmt([[
+switch {} {{
+case {}:
+	{}
+default:
+	{}
+}}]], {
+            i(1, "value"),
+            i(2, "condition"),
+            i(3, "// case body"),
+            i(4, "// default body")
+          })
+        }),
+
+        -- Goroutines and Channels
+        s("go", {
+          fmt([[
+go func() {{
+	{}
+}}()]], {
+            i(1, "// goroutine body")
+          })
+        }),
+
+        s("ch", {
+          fmt([[
+{} := make(chan {}{})]], {
+            i(1, "ch"),
+            i(2, "string"),
+            c(3, {
+              t(""),
+              t(", 1"),  -- buffered
+              t(", 10"), -- buffered
+            })
+          })
+        }),
+
+        s("ctx", {
+          fmt([[
+ctx, cancel := context.WithTimeout(context.Background(), {})
+defer cancel()]], {
+            c(1, {
+              t("30*time.Second"),
+              t("time.Minute"),
+              t("5*time.Second"),
+            })
+          })
+        }),
+
+        -- Testing Patterns
+        s("test", {
+          fmt([[
+func Test{}(t *testing.T) {{
+	tests := []struct {{
+		name string
+		{}
+		want {}
+	}}{{
+		{{
+			name: "{}",
+			{}: {},
+			want: {},
+		}},
+	}}
+	
+	for _, tt := range tests {{
+		t.Run(tt.name, func(t *testing.T) {{
+			got := {}
+			if got != tt.want {{
+				t.Errorf("got %v, want %v", got, tt.want)
+			}}
+		}})
+	}}
+}}]], {
+            i(1, "Function"),
+            i(2, "input string"),
+            i(3, "string"),
+            i(4, "valid input"),
+            i(5, "input"),
+            i(6, "\"test\""),
+            i(7, "\"expected\""),
+            i(8, "functionCall(tt.input)")
+          }),
+          condition = at_line_start
+        }),
+
+        s("bench", {
+          fmt([[
+func Benchmark{}(b *testing.B) {{
+	for i := 0; i < b.N; i++ {{
+		{}
+	}}
+}}]], {
+            i(1, "Function"),
+            i(2, "// benchmark code")
+          }),
+          condition = at_line_start
+        }),
+
+        -- Common Go Idioms
+        s("main", {
+          fmt([[
+func main() {{
+	{}
+}}]], {
+            i(1, "// main function body")
+          }),
+          condition = at_line_start
+        }),
+
+        s("make", {
+          fmt([[
+{} := make({}, {})]], {
+            i(1, "variable"),
+            c(2, {
+              t("[]string"),
+              t("map[string]string"),
+              t("chan string"),
+              t("[]int"),
+              t("map[string]int"),
+            }),
+            i(3, "0")
+          })
+        }),
+
+        s("defer", {
+          fmt([[
+defer func() {{
+	{}
+}}()]], {
+            i(1, "// cleanup code")
+          })
+        }),
+
+        -- Interface Implementation Check
+        s("impl", {
+          fmt([[
+var _ {} = (*{})({})]], {
+            i(1, "Interface"),
+            i(2, "Type"),
+            c(3, {
+              t("nil"),
+              t("&Type{}"),
+            })
+          }),
+          condition = at_line_start
+        }),
+      })
+
+      -- Enhanced snippet navigation keybindings
+      vim.keymap.set({ "i", "s" }, "<C-k>", function()
+        if luasnip.expand_or_jumpable() then
+          luasnip.expand_or_jump()
+        end
+      end, { desc = "Expand or jump to next snippet placeholder" })
+
+      vim.keymap.set({ "i", "s" }, "<C-j>", function()
+        if luasnip.jumpable(-1) then
+          luasnip.jump(-1)
+        end
+      end, { desc = "Jump to previous snippet placeholder" })
+
+      vim.keymap.set("i", "<C-l>", function()
+        if luasnip.choice_active() then
+          luasnip.change_choice(1)
+        end
+      end, { desc = "Cycle through snippet choices" })
+
+      -- Optimized performance settings for large projects
       cmp.setup({
+        performance = {
+          debounce = 100,         -- Balanced for large files
+          throttle = 60,          -- Smooth typing experience
+          fetching_timeout = 300, -- Quick timeout for large codebases
+          confirm_resolve_timeout = 120,
+          async_budget = 1,
+          max_view_entries = 25, -- Focused results for faster scanning
+        },
+
+        completion = {
+          keyword_length = 2,   -- Still used for buffer/path sources
+          completeopt = "menu,menuone,noinsert",
+          autocomplete = false, -- Disabled - Manual Alt+Space control
+        },
+
+        experimental = {
+          ghost_text = {
+            hl_group = "Comment",
+          },
+        },
+
+        -- Optimized matching for large codebases
+        matching = {
+          disallow_fuzzy_matching = false,
+          disallow_partial_matching = false,
+          disallow_prefix_unmatching = false,
+        },
+
         snippet = {
           expand = function(args)
             luasnip.lsp_expand(args.body)
           end,
         },
+
         window = {
-          completion = cmp.config.window.bordered(),
+          completion = cmp.config.window.bordered({
+            winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,Search:None",
+          }),
           documentation = cmp.config.window.bordered(),
         },
+
         mapping = cmp.mapping.preset.insert({
-          ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-f>'] = cmp.mapping.scroll_docs(4),
-          ['<C-Space>'] = cmp.mapping.complete(),
-          ['<C-e>'] = cmp.mapping.abort(),
-          ['<CR>'] = cmp.mapping.confirm({ select = false }),
+          -- Primary completion trigger
+          ['<C-Space>'] = cmp.mapping.complete(), -- Alt+Space (M = Meta/Alt key)
+
+          -- Close completion
+          ['<Esc>'] = cmp.mapping.abort(),
+
+          -- Navigation in completion menu
           ['<Tab>'] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_next_item()
             elseif luasnip.expand_or_jumpable() then
               luasnip.expand_or_jump()
-            elseif has_words_before() then
-              cmp.complete()
             else
-              fallback()
+              fallback() -- Normal tab behavior
             end
           end, { 'i', 's' }),
+
           ['<S-Tab>'] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_prev_item()
             elseif luasnip.jumpable(-1) then
               luasnip.jump(-1)
             else
-              fallback()
+              fallback() -- Normal shift-tab behavior
             end
           end, { 'i', 's' }),
+
+          -- Alternative navigation (backup)
+          ['<C-n>'] = cmp.mapping.select_next_item(),
+          ['<C-p>'] = cmp.mapping.select_prev_item(),
+
+          -- Documentation scrolling
+          ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+          ['<C-f>'] = cmp.mapping.scroll_docs(4),
+
+          -- Confirm completion with Enter
+          ['<CR>'] = cmp.mapping({
+            i = function(fallback)
+              if cmp.visible() and cmp.get_active_entry() then
+                cmp.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = false })
+              else
+                fallback() -- Normal Enter behavior
+              end
+            end,
+            s = cmp.mapping.confirm({ select = true }),
+            c = cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = true }),
+          }),
         }),
+
+        -- Optimized sources for large codebases
         sources = cmp.config.sources({
-          { name = 'nvim_lsp' },
-          { name = 'luasnip' },
-          { name = 'buffer' },
-          { name = 'path' },
+          {
+            name = 'nvim_lsp',
+            priority = 1000,
+            max_item_count = 20,
+            keyword_length = 1,
+          },
+          {
+            name = 'luasnip',
+            priority = 750,
+            max_item_count = 5,
+            keyword_length = 2,
+          },
+        }, {
+          {
+            name = 'buffer',
+            priority = 300,
+            keyword_length = 3,
+            max_item_count = 8,
+            -- Limit buffer scope for performance in large projects
+            option = {
+              get_bufnrs = function()
+                local bufs = {}
+                local current_buf = vim.api.nvim_get_current_buf()
+
+                -- Include current buffer
+                bufs[current_buf] = true
+
+                -- Include only visible buffers for performance
+                for _, win in ipairs(vim.api.nvim_list_wins()) do
+                  local buf = vim.api.nvim_win_get_buf(win)
+                  if vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_buf_get_option(buf, 'buflisted') then
+                    bufs[buf] = true
+                  end
+                end
+
+                return vim.tbl_keys(bufs)
+              end
+            }
+          },
+          {
+            name = 'path',
+            priority = 250,
+            max_item_count = 10,
+            keyword_length = 2,
+          },
         }),
+
+        -- Enhanced formatting for better visibility
+        formatting = {
+          fields = { "kind", "abbr", "menu" },
+          format = function(entry, vim_item)
+            -- Kind icons
+            local kind_icons = {
+              Text = "󰉿",
+              Method = "󰆧",
+              Function = "󰊕",
+              Constructor = "",
+              Field = "󰜢",
+              Variable = "󰀫",
+              Class = "󰠱",
+              Interface = "",
+              Module = "",
+              Property = "󰜢",
+              Unit = "󰑭",
+              Value = "󰎠",
+              Enum = "",
+              Keyword = "󰌋",
+              Snippet = "",
+              Color = "󰏘",
+              File = "󰈙",
+              Reference = "󰈇",
+              Folder = "󰉋",
+              EnumMember = "",
+              Constant = "󰏿",
+              Struct = "󰙅",
+              Event = "",
+              Operator = "󰆕",
+              TypeParameter = "",
+            }
+
+            vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind] or "", vim_item.kind)
+
+            -- Source labels
+            vim_item.menu = ({
+              nvim_lsp = "[LSP]",
+              luasnip = "[Snip]",
+              buffer = "[Buf]",
+              path = "[Path]",
+            })[entry.source.name]
+
+            -- Add snippet preview for luasnip entries
+            if entry.source.name == "luasnip" then
+              local snippet = entry:get_completion_item()
+              if snippet.documentation then
+                vim_item.menu = vim_item.menu .. " (snippet)"
+              end
+            end
+
+            -- Truncate long completions for performance
+            if #vim_item.abbr > 60 then
+              vim_item.abbr = string.sub(vim_item.abbr, 1, 57) .. "..."
+            end
+
+            return vim_item
+          end,
+        },
+
+        -- Sorting for relevance in large codebases
+        sorting = {
+          priority_weight = 2,
+          comparators = {
+            cmp.config.compare.offset,
+            cmp.config.compare.exact,
+            cmp.config.compare.score,
+            cmp.config.compare.recently_used,
+            cmp.config.compare.locality,
+            cmp.config.compare.kind,
+            cmp.config.compare.sort_text,
+            cmp.config.compare.length,
+            cmp.config.compare.order,
+          },
+        },
       })
 
-      -- Use buffer source for `/` and cmdline for ':'
+      -- Command line completion (minimal for performance)
       cmp.setup.cmdline('/', {
         mapping = cmp.mapping.preset.cmdline(),
-        sources = { { name = 'buffer' } }
+        sources = {
+          {
+            name = 'buffer',
+            max_item_count = 10,
+          }
+        }
       })
 
       cmp.setup.cmdline(':', {
         mapping = cmp.mapping.preset.cmdline(),
-        sources = cmp.config.sources({ { name = 'path' } }, { { name = 'cmdline' } })
+        sources = cmp.config.sources({
+          {
+            name = 'path',
+            max_item_count = 10,
+          }
+        }, {
+          {
+            name = 'cmdline',
+            max_item_count = 15,
+          }
+        })
       })
 
-      -- Load snippets
+      -- Load default snippets
       require("luasnip.loaders.from_vscode").lazy_load()
 
-      -- Go snippets
-      luasnip.add_snippets("go", {
-        luasnip.snippet("iferr", {
-          luasnip.text_node({ "if err != nil {", "\t" }),
-          luasnip.insert_node(1, "return fmt.Errorf(\"failed to %s: %w\", "),
-          luasnip.insert_node(2, "task"),
-          luasnip.text_node(", err)"),
-          luasnip.text_node({ "", "}" })
-        }),
+      -- Enhanced autopairs integration
+      local cmp_autopairs = require('nvim-autopairs.completion.cmp')
+      cmp.event:on(
+        'confirm_done',
+        cmp_autopairs.on_confirm_done()
+      )
 
-        luasnip.snippet("errn", {
-          luasnip.text_node({ "if err != nil {", "\t" }),
-          luasnip.insert_node(1, "return err"),
-          luasnip.text_node({ "", "}" })
-        }),
+      
+      -- Extract interface from struct
+      vim.api.nvim_create_user_command("GoExtractInterface", function()
+        vim.lsp.buf.code_action({
+          filter = function(action)
+            return action.title:find("Extract to interface") or action.title:find("extract interface")
+          end,
+          apply = true,
+        })
+      end, { desc = "Extract interface from Go struct" })
+
+      -- Add missing imports
+      vim.api.nvim_create_user_command("GoAddImports", function()
+        vim.lsp.buf.code_action({
+          context = { only = { "source.organizeImports" } },
+          apply = true,
+        })
+      end, { desc = "Add missing Go imports" })
+
+      -- Generate constructor function
+      vim.api.nvim_create_user_command("GoGenerateConstructor", function()
+        vim.lsp.buf.code_action({
+          filter = function(action)
+            return action.title:find("Generate constructor") or action.title:find("constructor")
+          end,
+          apply = true,
+        })
+      end, { desc = "Generate constructor function" })
+
+      -- Add struct tags
+      vim.api.nvim_create_user_command("GoAddStructTags", function()
+        local input = vim.fn.input("Tag (json,yaml,xml): ", "json")
+        if input ~= "" then
+          vim.cmd("GoAddTag " .. input)
+        end
+      end, { desc = "Add struct tags" })
+
+      -- Remove unused imports
+      vim.api.nvim_create_user_command("GoRemoveUnusedImports", function()
+        vim.lsp.buf.code_action({
+          context = { only = { "source.removeUnusedImports" } },
+          apply = true,
+        })
+      end, { desc = "Remove unused imports" })
+
+      -- Module analysis for large codebases
+      vim.api.nvim_create_user_command("GoModuleAnalysis", function()
+        local clients = vim.lsp.get_active_clients({ name = "gopls" })
+        if #clients == 0 then
+          vim.notify("gopls not active", vim.log.levels.WARN)
+          return
+        end
+
+        vim.notify("Running module analysis...", vim.log.levels.INFO)
+        vim.lsp.buf.code_action({
+          context = { only = { "source.tidy" } },
+          apply = true,
+        })
+      end, { desc = "Analyze Go module dependencies" })
+
+      -- Snippet management commands
+      vim.api.nvim_create_user_command("SnippetList", function()
+        local snippets = luasnip.get_snippets("go")
+        local snippet_names = {}
+        for _, snippet in ipairs(snippets) do
+          table.insert(snippet_names, snippet.trigger)
+        end
+        table.sort(snippet_names)
+        vim.notify("Available Go snippets:\n" .. table.concat(snippet_names, ", "), vim.log.levels.INFO)
+      end, { desc = "List all Go snippets" })
+
+      vim.api.nvim_create_user_command("SnippetReload", function()
+        luasnip.cleanup()
+        -- Re-run the snippet definitions
+        vim.cmd("luafile " .. vim.fn.stdpath("config") .. "/init.lua")
+        vim.notify("Snippets reloaded", vim.log.levels.INFO)
+      end, { desc = "Reload snippets" })
+
+      -- Performance monitoring command
+      vim.api.nvim_create_user_command("CmpStats", function()
+        print("Completion performance:")
+        print("- Sources loaded: " .. #cmp.core.sources)
+        print("- Cache size: " .. vim.tbl_count(cmp.core.view.entries or {}))
+        print("- Active: " .. tostring(cmp.visible()))
+      end, { desc = "Show completion performance stats" })
+
+      -- Disable completion in large files (>10k lines) for performance
+      vim.api.nvim_create_autocmd("BufReadPost", {
+        callback = function()
+          local lines = vim.api.nvim_buf_line_count(0)
+          if lines > 10000 then
+            vim.b.cmp_enabled = false
+            vim.notify("Completion disabled for large file (" .. lines .. " lines)", vim.log.levels.INFO)
+          end
+        end,
       })
 
-      -- Connect autopairs to cmp for optimal use
-      local cmp_autopairs = require('nvim-autopairs.completion.cmp')
-      cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
+      -- Re-enable completion command for large files
+      vim.api.nvim_create_user_command("CmpEnable", function()
+        vim.b.cmp_enabled = true
+        vim.notify("Completion re-enabled", vim.log.levels.INFO)
+      end, { desc = "Re-enable completion for current buffer" })
+
+      -- Show completion keybindings command
+      vim.api.nvim_create_user_command("CmpHelp", function()
+        local help_text = [[
+Completion Workflow:
+• Alt+Space: Trigger completion menu
+• Tab/Shift+Tab: Navigate up/down in menu
+• Enter: Confirm selected completion
+• Esc: Close completion menu
+
+Snippet Navigation:
+• Tab: Jump to next snippet placeholder
+• Shift+Tab: Jump to previous snippet placeholder
+• Ctrl+K: Expand or jump forward
+• Ctrl+J: Jump backward
+• Ctrl+L: Cycle through choices
+
+Go Commands:
+• :GoExtractInterface - Extract interface from struct
+• :GoAddImports - Add missing imports
+• :GoGenerateConstructor - Generate constructor
+• :GoAddStructTags - Add struct tags
+• :GoRemoveUnusedImports - Clean unused imports
+• :GoModuleAnalysis - Analyze dependencies
+
+Performance Commands:
+• :CmpStats - Show completion performance
+• :CmpEnable - Re-enable in large files
+• :SnippetList - List all Go snippets
+• :SnippetReload - Reload snippets
+        ]]
+        vim.notify(help_text, vim.log.levels.INFO)
+      end, { desc = "Show completion help" })
     end
   },
+})
+
+
+vim.api.nvim_create_user_command("GoPerformanceStats", function()
+  local stats = {
+    "=== Go Development Performance Stats ===",
+    "LSP Status: " .. (vim.lsp.get_active_clients({ name = "gopls" })[1] and "Active" or "Inactive"),
+    "Completion Sources: " .. (#require('cmp').core.sources or 0),
+    "Treesitter: " .. (vim.treesitter.highlighter.active[vim.api.nvim_get_current_buf()] and "Active" or "Inactive"),
+    "Buffer Size: " .. vim.api.nvim_buf_line_count(0) .. " lines",
+    "File Type: " .. vim.bo.filetype,
+  }
+
+  vim.notify(table.concat(stats, "\n"), vim.log.levels.INFO)
+end, { desc = "Show Go development performance stats" })
+
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "go",
+  callback = function()
+    local opts = { noremap = true, silent = true, buffer = true }
+
+    -- Enhanced Go navigation
+    vim.keymap.set('n', '<leader>gei', ':GoExtractInterface<CR>',
+      vim.tbl_extend("force", opts, { desc = "Extract interface" }))
+    vim.keymap.set('n', '<leader>gai', ':GoAddImports<CR>', vim.tbl_extend("force", opts, { desc = "Add imports" }))
+    vim.keymap.set('n', '<leader>ggc', ':GoGenerateConstructor<CR>',
+      vim.tbl_extend("force", opts, { desc = "Generate constructor" }))
+    vim.keymap.set('n', '<leader>gast', ':GoAddStructTags<CR>',
+      vim.tbl_extend("force", opts, { desc = "Add struct tags" }))
+    vim.keymap.set('n', '<leader>grui', ':GoRemoveUnusedImports<CR>',
+      vim.tbl_extend("force", opts, { desc = "Remove unused imports" }))
+    vim.keymap.set('n', '<leader>gma', ':GoModuleAnalysis<CR>',
+      vim.tbl_extend("force", opts, { desc = "Module analysis" }))
+    vim.keymap.set('n', '<leader>gps', ':GoPerformanceStats<CR>',
+      vim.tbl_extend("force", opts, { desc = "Performance stats" }))
+  end,
+})
+
+-- Startup performance notification
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    vim.defer_fn(function()
+      vim.notify("🚀 Go-optimized Neovim ready! Use :CmpHelp for keybindings.", vim.log.levels.INFO)
+    end, 1000)
+  end,
 })
 
