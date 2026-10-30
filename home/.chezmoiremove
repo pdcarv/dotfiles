@@ -12,3 +12,7 @@
 .config/zsh/.zshrc.zwc
 .config/zsh/.zcompdump
 .config/zsh/.zcompdump.zwc
+# vim-plug, ag and the old fzf install.
+.vim
+.agignore
+.fzf.zsh
