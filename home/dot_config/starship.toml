@@ -1,0 +1,15 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Default module layout. Colours are ANSI names, which Ghostty's gruvbox theme
+# defines, so the prompt follows light/dark mode like tmux and fzf.
+palette = "gruvbox"
+
+[palettes.gruvbox]
+red = "red"
+green = "green"
+yellow = "yellow"
+blue = "blue"
+purple = "purple"
+cyan = "cyan"
+white = "white"
+black = "black"

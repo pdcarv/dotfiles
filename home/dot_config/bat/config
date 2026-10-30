@@ -1,0 +1,3 @@
+# bat detects the terminal's light/dark mode and picks one of these.
+--theme-dark=gruvbox-dark
+--theme-light=gruvbox-light

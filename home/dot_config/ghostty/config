@@ -25,7 +25,8 @@ font-thicken = true
 #    (iTerm2 needs a plugin for this; Ghostty is native)
 #    Browse: ghostty +list-themes
 # ------------------------------------------------------------
-theme = light:Catppuccin Latte,dark:Catppuccin Mocha
+# Gruvbox hard contrast, matching nvim (gruvbox.nvim contrast = "hard")
+theme = light:Gruvbox Light Hard,dark:Gruvbox Dark Hard
 
 # ------------------------------------------------------------
 # 3. Window appearance
