@@ -6,5 +6,5 @@ set -euo pipefail
 
 cd {{ .chezmoi.workingTree | quote }}
 for brewfile in Brewfile Brewfile.{{ .machine }}; do
-    brew bundle check --file "$brewfile" >/dev/null || brew bundle install --no-upgrade --file "$brewfile"
+    brew bundle check --no-upgrade --file "$brewfile" >/dev/null ||brew bundle install --no-upgrade --file "$brewfile"
 done
