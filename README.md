@@ -38,7 +38,9 @@ and bat has a light and a dark theme. delta stays on `gruvbox-dark`, and vim use
    chezmoi init --apply --source ~/Development/personal/dotfiles https://github.com/pdcarv/dotfiles.git
    ```
 
-4. **Work machines only:** machine-local settings live outside the repo.
+4. **Work machines only:** machine-local settings live outside the repo. Shell settings
+   go in `~/.config/zsh/work.zsh` (loaded if present); git settings go in
+   `~/.config/git/config.local` (included if present).
 
 ## Daily workflow
 
@@ -56,15 +58,14 @@ and bat has a light and a dark theme. delta stays on `gruvbox-dark`, and vim use
 ## Machine data
 
 `chezmoi init` asks once per machine and stores the answers only in the local
-`~/.config/chezmoi/chezmoi.toml`, never in this repo:
+`~/.config/chezmoi/chezmoi.toml`:
 
 | Key | Values | Used for |
 |---|---|---|
-| `machine` | `personal` \| `work` | Which `Brewfile.<machine>` and which zsh file (`personal.zsh` or `work.zsh`) apply |
+| `machine` | `personal` \| `work` | Which `Brewfile.<machine>` applies, and whether `personal.zsh` is linked |
 | `git_name`, `git_email` | identity | `[user]` in `~/.config/git/config` |
 | `git_signingkey` | path to an SSH `.pub` key | commit signing |
 
 To change an answer, edit `~/.config/chezmoi/chezmoi.toml` and run `chezmoi apply`.
 Don't use `git config --global`: it writes to the rendered `~/.config/git/config`, and
 the next apply reverts it. Change the template (`chezmoi edit ~/.config/git/config`) instead.
-

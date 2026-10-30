@@ -33,5 +33,5 @@ brew "mise"
 brew "uv"
 brew "golangci-lint"
 
-# Dotfiles and secrets
+# Dotfiles
 brew "chezmoi"

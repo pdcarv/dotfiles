@@ -1,4 +1,4 @@
-{{- /* Machine data: prompted once, stored only in ~/.config/chezmoi/chezmoi.toml. */ -}}
+{{- /* Machine data: prompted once, stored in ~/.config/chezmoi/chezmoi.toml. */ -}}
 {{- $machine := promptChoiceOnce . "machine" "Machine" (list "personal" "work") -}}
 {{- $gitName := promptStringOnce . "git_name" "Git name" -}}
 {{- $gitEmail := promptStringOnce . "git_email" "Git email" -}}

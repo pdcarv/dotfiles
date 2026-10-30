@@ -74,7 +74,7 @@ bindkey -M vicmd '^r' atuin-search-vicmd
 
 eval "$(mise activate zsh)"
 
-# --- Aliases, helpers, and this machine's extras (personal.zsh or work.zsh)
+# --- Aliases, helpers, and this machine's extras (personal.zsh, or a local work.zsh)
 for zsh_file in $ZDOTDIR/{aliases,helpers,personal,work}.zsh(N); do
     source $zsh_file
 done
