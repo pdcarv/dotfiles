@@ -2,21 +2,11 @@ function gr() {
  builtin cd $(git rev-parse --show-toplevel)
 }
 
-function lag() {
-  ag --group --color $* | less -r +k
-}
-
-# fv - open selected file with default editor
+# fv - fuzzy-pick files under a directory (default .) and open them in $EDITOR
 fv() {
-  local files
-
-  files=(${(f)"$(locate -Ai -0 $@ | grep -z -vE '~$' | fzf --read0 -0 -1 -m)"})
-
-  if [[ -n $files ]]
-  then
-    vim -- $files
-    print -l $files[1]
-  fi
+  local -a files
+  files=(${(f)"$(fd --type f --hidden --exclude .git . "${1:-.}" | fzf -m -0 -1 --preview 'bat --style=numbers --color=always {}')"})
+  (( $#files )) && $EDITOR -- $files
 }
 
 # fcd - cd to selected directory (uses the fd binary + fzf)
@@ -56,8 +46,7 @@ tm() {
   fi
 }
 
-# Clean all unused docker images
+# Remove stopped containers, dangling images, unused networks and build cache
 dcleanup() {
-  docker rm -v $(docker ps --filter status=exited -q 2>/dev/null) 2>/dev/null
-  docker rmi $(docker images --filter dangling=true -q 2>/dev/null) 2>/dev/null
+  docker system prune "$@"
 }

@@ -6,3 +6,9 @@
 .gitconfig
 .gitignore
 .tmux.conf
+# zsh rewrite (config/exports merged; caches now under $XDG_CACHE_HOME/zsh).
+.config/zsh/config.zsh
+.config/zsh/exports.zsh
+.config/zsh/.zshrc.zwc
+.config/zsh/.zcompdump
+.config/zsh/.zcompdump.zwc

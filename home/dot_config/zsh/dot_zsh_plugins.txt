@@ -1,4 +1,8 @@
-zsh-users/zsh-completions
+# Order matters: fpath first, then compinit, then fzf-tab, then the widget wrappers.
+# history-substring-search loads after syntax-highlighting, as its README requires.
+zsh-users/zsh-completions kind:fpath path:src
+$ZDOTDIR/compinit.zsh
+Aloxaf/fzf-tab
 zsh-users/zsh-autosuggestions
-# Any other plugins...
 zsh-users/zsh-syntax-highlighting
+zsh-users/zsh-history-substring-search
