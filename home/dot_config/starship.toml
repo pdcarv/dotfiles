@@ -4,6 +4,9 @@
 # defines, so the prompt follows light/dark mode like tmux and fzf.
 palette = "gruvbox"
 
+# Default is 500ms; a cold fsmonitor/untracked-cache git status can exceed it.
+command_timeout = 2000
+
 [palettes.gruvbox]
 red = "red"
 green = "green"
