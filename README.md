@@ -7,12 +7,15 @@ macOS development environment for a personal and a work Mac, managed with
 
 | Path | Contents |
 |---|---|
-| `home/` | chezmoi source state (selected by `.chezmoiroot`): zsh, git, tmux, Ghostty, atuin, Hammerspoon, vim |
+| `home/` | chezmoi source state (selected by `.chezmoiroot`): zsh, git, tmux, Ghostty, starship, bat, mise, atuin, Hammerspoon (config only; not in the Brewfiles), vim |
 | `nvim/` | Neovim config, linked as one directory to `~/.config/nvim` |
 | `Brewfile`, `Brewfile.personal`, `Brewfile.work` | Homebrew packages, shared and per machine |
 
 Config lives in XDG locations (`~/.config/zsh`, `~/.config/git`, `~/.config/tmux`, …).
-`~/.zshenv` only sets `ZDOTDIR` and the `XDG_*` variables.
+`~/.zshenv` sets `ZDOTDIR`, the `XDG_*` variables, `LANG`, `EDITOR` and `VISUAL`. Runtimes
+come from mise (Ruby, Java, Node, sbt) and uv (Python). The theme is gruvbox: Ghostty
+switches between light and dark, tmux, fzf and starship follow it through the ANSI palette,
+and bat has a light and a dark theme. delta stays on `gruvbox-dark`, and vim uses `retrobox`.
 
 ## Bootstrap a new Mac
 
