@@ -1,0 +1,14 @@
+{{- /* Machine data: prompted once, stored only in ~/.config/chezmoi/chezmoi.toml. */ -}}
+{{- $machine := promptChoiceOnce . "machine" "Machine" (list "personal" "work") -}}
+{{- $gitName := promptStringOnce . "git_name" "Git name" -}}
+{{- $gitEmail := promptStringOnce . "git_email" "Git email" -}}
+{{- $gitSigningKey := promptStringOnce . "git_signingkey" "Git SSH signing key (path to .pub)" "~/.ssh/id_ed25519.pub" -}}
+
+sourceDir = {{ .chezmoi.workingTree | quote }}
+mode = "symlink"
+
+[data]
+    machine = {{ $machine | quote }}
+    git_name = {{ $gitName | quote }}
+    git_email = {{ $gitEmail | quote }}
+    git_signingkey = {{ $gitSigningKey | quote }}
