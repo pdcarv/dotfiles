@@ -1,0 +1,10 @@
+# Global runtimes. Python is owned by uv, not mise.
+[tools]
+ruby = "3"
+java = "temurin-25"
+node = "lts"
+sbt = "latest"
+
+[settings]
+idiomatic_version_file_enable_tools = ["ruby", "java", "node"]
+disable_tools = ["python"]

@@ -1,20 +1,8 @@
 # Define paths in a more organized way to avoid duplication and potential path issues
 export PATH="/opt/homebrew/bin:$PATH"
-export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 export PATH="/usr/local/bin:/usr/local/sbin:$PATH"
 export PATH="$HOME/scripts:$PATH"
 export PATH="$HOME/bin:$PATH"
-export PATH="$HOME/.rbenv/bin:$PATH"
-export PATH="$HOME/.ghcup/env:$PATH"
-
-# Node.js
-export NODE_PATH="/usr/local/lib/node_modules"
-
-# Java
-export JAVA_HOME=$(/usr/libexec/java_home)
-
-# Ruby
-export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
 
 # Editor
 export EDITOR='nvim'

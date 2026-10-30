@@ -1,9 +1,6 @@
 # Load local config if it exists
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
-# Load .ghc
-[ -f "$HOME/.ghcup/env" ] && source "$HOME/.ghcup/env"
-
 
 # Performance optimization - zshrc compilation
 if [[ ! -f $ZDOTDIR/.zshrc.zwc || $ZDOTDIR/.zshrc -nt $ZDOTDIR/.zshrc.zwc ]]; then
@@ -156,56 +153,9 @@ fi
 
 # Only load when explicitly called
 
-# Ruby environment
-rbenv() {
-  # Remove this function
-  unfunction rbenv
-  # Load the real rbenv
-  eval "$(command rbenv init -)"
-  # Call the now-loaded command
-  rbenv "$@"
-}
-
 # Directory navigation
 eval "$(zoxide init zsh)"
 alias za='zoxide add'
-
-# Node version management with Vim/coc.nvim support
-fnm() {
-  unfunction fnm
-  # Load fnm properly
-  eval "$(command fnm env --use-on-cd)"
-  fnm "$@"
-}
-
-# Ensure node is available for Vim/Neovim with coc.nvim
-vim() {
-  # If node is not in path and fnm exists
-  if ! command -v node >/dev/null 2>&1 && command -v fnm >/dev/null 2>&1; then
-    # Load fnm first
-    eval "$(command fnm env --use-on-cd)"
-  fi
-  # Then run the real vim command
-  command vim "$@"
-}
-
-# Also handle neovim if you use it
-nvim() {
-  # If node is not in path and fnm exists
-  if ! command -v node >/dev/null 2>&1 && command -v fnm >/dev/null 2>&1; then
-    # Load fnm first
-    eval "$(command fnm env --use-on-cd)"
-  fi
-  # Then run the real nvim command
-  command nvim "$@"
-}
-
-# Python environment
-pyenv() {
-  unfunction pyenv
-  eval "$(command pyenv init -)"
-  pyenv "$@"
-}
 
 # FZF: Ctrl-T files, Alt-C directories (Ctrl-R is rebound to Atuin below).
 # Needs a terminal; skipped for non-terminal `zsh -ic` runs.
@@ -269,6 +219,9 @@ if [[ -d "$ZSH" ]]; then
     fi
   done
 fi
+
+# Runtimes: Ruby, Java, Node, sbt (Python is uv)
+eval "$(mise activate zsh)"
 
 # Initialize Starship prompt with multiple detection methods
 # First, check if we've already confirmed Starship is installed in a previous session
