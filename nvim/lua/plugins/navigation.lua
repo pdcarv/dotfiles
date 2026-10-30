@@ -54,6 +54,21 @@ return {
     opts = {},
   },
 
+  -- Same keys move between nvim windows and tmux panes (tmux side in tmux.conf)
+  {
+    "christoomey/vim-tmux-navigator",
+    cmd = { "TmuxNavigateLeft", "TmuxNavigateDown", "TmuxNavigateUp", "TmuxNavigateRight" },
+    init = function()
+      vim.g.tmux_navigator_no_mappings = 1
+    end,
+    keys = {
+      { "<C-h>", "<cmd>TmuxNavigateLeft<cr>",  desc = "Window/pane left" },
+      { "<C-j>", "<cmd>TmuxNavigateDown<cr>",  desc = "Window/pane down" },
+      { "<C-k>", "<cmd>TmuxNavigateUp<cr>",    desc = "Window/pane up" },
+      { "<C-l>", "<cmd>TmuxNavigateRight<cr>", desc = "Window/pane right" },
+    },
+  },
+
   -- Quick file switching
   {
     "ThePrimeagen/harpoon",
