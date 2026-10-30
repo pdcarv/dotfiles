@@ -11,11 +11,13 @@
 
 [commit]
     gpgsign = true
+    verbose = true
 
 [alias]
     ci = commit -v
     amend = commit --amend
-    co = checkout
+    co = switch
+    rs = restore
     st = status -s
     br = branch -v
     rt = remote -v
@@ -31,11 +33,9 @@
     brd = branch -d
     brD = branch -D
     sl = stash list
-    ss = stash save
+    ss = stash push
     sp = stash pop
     sa = stash apply
-    gotest = "!gt() { go test ./... ${1:-.}; }; gt"
-    gobuild = "!gb() { go build ./...; }; gb"
     review = diff --stat -p -w --patience
     files = diff --name-only
     save = "!f() { git add -A && git commit -m \"$@\" && git push; }; f"
@@ -47,31 +47,24 @@
     incoming = "!f() { git fetch && git log ..origin/$(git rev-parse --abbrev-ref HEAD); }; f"
     outgoing = "!f() { git fetch && git log origin/$(git rev-parse --abbrev-ref HEAD)..; }; f"
 
-[color]
-    ui = auto
-
 [push]
     default = current
     autoSetupRemote = true
+    followTags = true
 
 [core]
     editor = nvim
     pager = delta
     autocrlf = input
     whitespace = trailing-space,space-before-tab
-    # Performance optimizations
-    fscache = true
     preloadindex = true
-    packedGitLimit = 512m
-    packedGitWindowSize = 512m
-    bigFileThreshold = 64m
-    deltaBaseCacheLimit = 2g
+    fsmonitor = true
+    untrackedCache = true
 
 [merge]
     summary = true
     conflictstyle = zdiff3
     tool = nvimdiff
-    ff = only
 
 [mergetool]
     keepBackup = false
@@ -79,7 +72,6 @@
 [diff]
     algorithm = histogram
     colorMoved = default
-    compactionHeuristic = true
 
 [rebase]
     autosquash = true
@@ -91,32 +83,30 @@
 
 [fetch]
     prune = true
-    # Performance optimizations
-    parallel = 4
+    pruneTags = true
     recurseSubmodules = false
 
 [rerere]
     enabled = true
+    autoupdate = true
 
 [branch]
     sort = -committerdate
 
+[tag]
+    sort = version:refname
+
+[column]
+    ui = auto
+
+[help]
+    autocorrect = prompt
+
 [pull]
     rebase = true
-    ff = only
-
-[pack]
-    packSizeLimit = 512m
-    windowMemory = 512m
-    threads = 4
-    deltaCacheSize = 256m
 
 [status]
     showUntrackedFiles = normal
-
-[gc]
-    auto = 256
-    autoPackLimit = 64
 
 [feature]
     manyFiles = true
@@ -124,9 +114,8 @@
 [delta]
     features = side-by-side line-numbers decorations
     max-line-length = 1024
-    syntax-theme = ansi
+    syntax-theme = gruvbox-dark
     navigate = true
-    light = false
 
 [index]
     version = 4
