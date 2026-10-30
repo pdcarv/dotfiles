@@ -1,0 +1,10 @@
+#!/bin/bash
+# Installs packages from the Brewfiles; chezmoi re-runs this when either changes.
+# Brewfile: {{ include (joinPath .chezmoi.workingTree "Brewfile") | sha256sum }}
+# Brewfile.{{ .machine }}: {{ include (joinPath .chezmoi.workingTree (printf "Brewfile.%s" .machine)) | sha256sum }}
+set -euo pipefail
+
+cd {{ .chezmoi.workingTree | quote }}
+for brewfile in Brewfile Brewfile.{{ .machine }}; do
+    brew bundle check --file "$brewfile" >/dev/null || brew bundle install --no-upgrade --file "$brewfile"
+done

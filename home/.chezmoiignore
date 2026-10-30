@@ -1,1 +1,8 @@
 # Paths in the source state that chezmoi must not apply.
+
+{{ if ne .machine "personal" }}
+.config/zsh/personal.zsh
+{{ end }}
+{{ if ne .machine "work" }}
+.config/zsh/work.zsh
+{{ end }}
