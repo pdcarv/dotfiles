@@ -1,6 +1,3 @@
-[include]
-    path = ~/.gitconfig.local
-
 [gpg]
     format = ssh
 
@@ -8,7 +5,9 @@
     allowedSignersFile = ~/.ssh/allowed_signers
 
 [user]
-    signingkey = ~/.ssh/id_ed25519.pub
+    name = {{ .git_name }}
+    email = {{ .git_email }}
+    signingkey = {{ .git_signingkey }}
 
 [commit]
     gpgsign = true
