@@ -1,1 +1,8 @@
 # Targets chezmoi removes from $HOME (populated as files move to XDG locations).
+# zsh, git and tmux moved under ~/.config.
+.zshrc
+.zsh_plugins.txt
+.zsh
+.gitconfig
+.gitignore
+.tmux.conf

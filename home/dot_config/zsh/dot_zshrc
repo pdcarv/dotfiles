@@ -6,15 +6,15 @@
 
 
 # Performance optimization - zshrc compilation
-if [[ ! -f ~/.zshrc.zwc || ~/.zshrc -nt ~/.zshrc.zwc ]]; then
-    zcompile ~/.zshrc
+if [[ ! -f $ZDOTDIR/.zshrc.zwc || $ZDOTDIR/.zshrc -nt $ZDOTDIR/.zshrc.zwc ]]; then
+    zcompile $ZDOTDIR/.zshrc
 fi
 
 # Increase function nesting limit to prevent errors with Starship
 FUNCNEST=2000
 
 # Path to zsh configuration directory
-export ZSH=$HOME/.zsh
+export ZSH=$ZDOTDIR
 
 # Improved command history - set early
 HISTFILE=~/.zsh_history
@@ -53,7 +53,7 @@ zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 
 # Load antidote - plugin manager
-source ${ZDOTDIR:-~}/.antidote/antidote.zsh
+source ~/.antidote/antidote.zsh
 
 # Create/load static plugin file with minimal plugins
 ANTIDOTE_STATIC_FILE=${ZDOTDIR:-~}/.zsh_plugins.zsh
@@ -107,7 +107,7 @@ function load-completion-system() {
   
   # Load more completion settings only when needed
   zstyle ':completion:*' use-cache on
-  zstyle ':completion:*' cache-path ~/.zsh/cache
+  zstyle ':completion:*' cache-path $XDG_CACHE_HOME/zsh
   zstyle ':completion:*' verbose yes
   
   # Return true
@@ -246,7 +246,7 @@ if (( $+commands[atuin] )); then
     fi
 fi
 
-# Load configuration files from ~/.zsh/ directory
+# Load configuration files from $ZDOTDIR/*.zsh
 if [[ -d "$ZSH" ]]; then
   # Define priority files to load first (if they exist)
   priority_files=(
