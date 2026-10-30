@@ -17,8 +17,8 @@ export JAVA_HOME=$(/usr/libexec/java_home)
 export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
 
 # Editor
-export EDITOR='vim'
-export VISUAL='vim'
+export EDITOR='nvim'
+export VISUAL='nvim'
 
 # Less
 export LESS='-R --ignore-case --status-column --LONG-PROMPT --RAW-CONTROL-CHARS --HILITE-UNREAD --tabs=4 --no-init --window=-4'
@@ -44,7 +44,7 @@ export LC_ALL="en_US.UTF-8"
 export CLICOLOR=1
 export LSCOLORS=ExFxBxDxCxegedabagacad
 
-# FZF config lives in zshrc's lazy _fzf_init_and_run (deferred until first use)
+# FZF config lives in zshrc
 
 # Development
 export PYTHONDONTWRITEBYTECODE=1  # Prevent Python from writing .pyc files

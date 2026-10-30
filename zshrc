@@ -72,7 +72,6 @@ source $ANTIDOTE_STATIC_FILE
 
 # ULTRA-MINIMAL zsh-autosuggestions plugin config
 # Maximum performance settings
-export ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=5
 export ZSH_AUTOSUGGEST_USE_ASYNC=true
 export ZSH_AUTOSUGGEST_MANUAL_REBIND=true
 export ZSH_AUTOSUGGEST_STRATEGY=(history)
@@ -168,13 +167,8 @@ rbenv() {
 }
 
 # Directory navigation
-zoxide() {
-  unfunction zoxide
-  eval "$(command zoxide init zsh)"
-  alias zi='z -i'
-  alias za='zoxide add'
-  zoxide "$@"
-}
+eval "$(zoxide init zsh)"
+alias za='zoxide add'
 
 # Node version management with Vim/coc.nvim support
 fnm() {
@@ -213,6 +207,19 @@ pyenv() {
   pyenv "$@"
 }
 
+# FZF: Ctrl-T files, Alt-C directories (Ctrl-R is rebound to Atuin below).
+# Needs a terminal; skipped for non-terminal `zsh -ic` runs.
+if [[ -t 0 ]] && (( $+commands[fzf] )); then
+    export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border"
+    export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    if (( $+commands[bat] )); then
+        export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always {}'"
+    fi
+    export FZF_CTRL_R_OPTS="--no-preview"
+    source <(fzf --zsh)
+fi
+
 # Atuin - improved widget detection and fallback chain
 if (( $+commands[atuin] )); then
     # Tell Atuin not to set up its own keybindings
@@ -237,68 +244,7 @@ if (( $+commands[atuin] )); then
         # Fallback in case widget not found
         bindkey '^r' history-incremental-search-backward
     fi
-else
-    # FZF history search if Atuin isn't available
-    if [[ -f ~/.fzf.zsh ]]; then
-        bindkey '^r' _fzf_history_wrapper
-    else
-        # Traditional history search as last resort
-        bindkey '^r' history-incremental-search-backward
-    fi
 fi
-
-# FZF Configuration - with context-specific settings
-_fzf_init_and_run() {
-    # Which widget should we run after init
-    local widget_to_run="$1"
-    
-    # Initialize FZF if not already done
-    if [[ -f ~/.fzf.zsh ]] && [[ -z "$FZF_INITIALIZED" ]]; then
-        export FZF_INITIALIZED=1
-        
-        # Common options without preview (simpler, works everywhere)
-        export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border"
-        
-        # File-specific settings
-        export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
-        export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-        
-        # Only use preview for file operations if bat exists
-        if (( $+commands[bat] )); then
-            # Context-specific options
-            export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always {}'"
-        fi
-        
-        # History-specific settings - no preview, optimized for commands
-        export FZF_CTRL_R_OPTS="--no-preview"
-        
-        # Source FZF but don't disable its keybindings (to match original)
-        source ~/.fzf.zsh
-    fi
-    
-    # If widget exists now, run it
-    if [[ "$widget_to_run" == "file" ]]; then
-        zle fzf-file-widget
-    elif [[ "$widget_to_run" == "cd" ]]; then
-        zle fzf-cd-widget
-    elif [[ "$widget_to_run" == "history" ]]; then
-        zle fzf-history-widget
-    fi
-}
-
-# Create wrapper widgets for FZF functions
-_fzf_file_wrapper() { _fzf_init_and_run "file"; }
-_fzf_cd_wrapper() { _fzf_init_and_run "cd"; }
-_fzf_history_wrapper() { _fzf_init_and_run "history"; }
-
-# Define these as ZLE widgets
-zle -N _fzf_file_wrapper
-zle -N _fzf_cd_wrapper
-zle -N _fzf_history_wrapper
-
-# Bind keys to our wrapper functions - matches original config
-bindkey '^T' _fzf_file_wrapper
-bindkey '^[c' _fzf_cd_wrapper
 
 # Load configuration files from ~/.zsh/ directory
 if [[ -d "$ZSH" ]]; then

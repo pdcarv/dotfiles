@@ -19,23 +19,15 @@ ctags
 
 # Ruby
 .bundle/
-.ruby-version
-.rvmrc
-.ruby-gemset
 Gemfile.local
 Gemfile.local.lock
 
 # Temp and local files
 *.orig
-devenv.sh
 dump.rdb
 *.local
 
 # Infrastructure
-docker/
 .vagrant/
-Cheffile
-Cheffile.lock
-Vagrantfile
 
 **/.claude/settings.local.json
