@@ -70,11 +70,12 @@ set signcolumn=yes        " Always show signcolumn
 set noswapfile
 set nobackup
 set nowritebackup
-if !isdirectory($HOME."/.vim/undodir")
-    call mkdir($HOME."/.vim/undodir", "p")
+" Keep undo history out of ~/.vim, which is symlinked into the dotfiles repo
+if !isdirectory($HOME."/.local/state/vim/undo")
+    call mkdir($HOME."/.local/state/vim/undo", "p")
 endif
 set undofile
-set undodir=~/.vim/undodir
+set undodir=~/.local/state/vim/undo
 
 " Interface
 set number

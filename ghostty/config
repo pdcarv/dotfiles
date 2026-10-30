@@ -1,37 +1,151 @@
-# ~/.config/ghostty/config
-# Ghostty Configuration - Optimized for Readability and Comfort
-# Based on user input, Tokyonight (Night variant), JetBrains Mono, and ergonomic principles.
+# ============================================================
+# Ghostty power config — iTerm2 parity, vim + zsh workflow
+# Location: ~/.config/ghostty/config
+#   (also valid: ~/Library/Application Support/com.mitchellh.ghostty/config)
+# Validate:  ghostty +validate-config
+# Inspect:   ghostty +show-config --default --docs
+# Targets Ghostty >= 1.2 (Title Case theme names, command palette,
+# SSH shell-integration features)
+# ============================================================
 
-# --- Window Appearance & Behavior ---
-window-colorspace = srgb
+# ------------------------------------------------------------
+# 1. Font and rendering
+# ------------------------------------------------------------
+font-family = "JetBrainsMono Nerd Font"
+font-size = 13
+font-thicken = true
+# Ligatures are personal: vim users often disable them so `=>` etc.
+# stay byte-faithful. Uncomment to disable:
+# font-feature = -calt
+# font-feature = -liga
+# font-feature = -dlig
+
+# ------------------------------------------------------------
+# 2. Theme — auto light/dark sync with macOS appearance
+#    (iTerm2 needs a plugin for this; Ghostty is native)
+#    Browse: ghostty +list-themes
+# ------------------------------------------------------------
+theme = light:Catppuccin Latte,dark:Catppuccin Mocha
+
+# ------------------------------------------------------------
+# 3. Window appearance
+# ------------------------------------------------------------
+background-opacity = 0.97
+background-blur = true
 window-padding-x = 8
-window-padding-y = 8
+window-padding-y = 6
+window-padding-balance = true
+macos-titlebar-style = tabs
+macos-non-native-fullscreen = true
+unfocused-split-opacity = 0.85
+mouse-hide-while-typing = true
 
-# --- Font Configuration ---
-# JetBrains Mono: Chosen for clarity, tall x-height, distinct characters (l/1/I, O/0).
-font-size = 16
-font-family = JetBrains Mono
-
-# --- Color Scheme: Gruvbox ---
-# Low-contrast dark theme, easy on the eyes for extended use.
-# Explicit colors override the built-in theme but defining `theme` can set defaults.
-theme = light:GruvboxLight,dark:GruvboxDarkHard
-
-# --- Cursor ---
+# ------------------------------------------------------------
+# 4. Cursor — block, non-blinking (vim-friendly)
+#    Shell integration switches to a bar at the prompt; remove
+#    "no-cursor" exclusion below if you dislike that.
+# ------------------------------------------------------------
 cursor-style = block
-cursor-style-blink = true
+cursor-style-blink = false
 
-# --- Terminal Behavior ---
-copy-on-select = true
-clipboard-read = allow
-clipboard-write = allow
-
-# --- Shell Integration (Optional) ---
-# Provides deeper integration with shells (e.g., current directory tracking).
-# Requires specific shell setup. See Ghostty documentation.
+# ------------------------------------------------------------
+# 5. Shell integration (zsh) — powers prompt jumping, cwd
+#    inheritance, sudo wrapping, title updates, SSH fixes
+# ------------------------------------------------------------
 shell-integration = zsh
+shell-integration-features = cursor,sudo,title,ssh-env,ssh-terminfo
 
-# --- Updates ---
+# ------------------------------------------------------------
+# 6. Scrollback and session behavior
+#    scrollback-limit is BYTES per surface (here ~64 MiB)
+# ------------------------------------------------------------
+scrollback-limit = 67108864
+window-save-state = always
+window-inherit-working-directory = true
+confirm-close-surface = true
 auto-update = check
-auto-update-channel = stable
 
+# ------------------------------------------------------------
+# 7. Clipboard — iTerm2-style safety + convenience
+# ------------------------------------------------------------
+copy-on-select = clipboard
+clipboard-read = ask
+clipboard-paste-protection = true
+clipboard-trim-trailing-spaces = true
+
+# ------------------------------------------------------------
+# 8. Keyboard — Option as Alt (left only, so right Option still
+#    types PT-layout accents/symbols)
+# ------------------------------------------------------------
+macos-option-as-alt = left
+
+# ------------------------------------------------------------
+# 9. Quick Terminal (iTerm2 "Hotkey Window" replacement)
+#    `global:` works system-wide; macOS will request
+#    Accessibility permission on first use.
+# ------------------------------------------------------------
+keybind = global:cmd+grave_accent=toggle_quick_terminal
+quick-terminal-position = top
+quick-terminal-autohide = true
+quick-terminal-animation-duration = 0.1
+
+# ------------------------------------------------------------
+# 10. Splits — iTerm2 muscle memory for creation,
+#     vim hjkl for navigation
+# ------------------------------------------------------------
+# Create (iTerm2 parity: Cmd+D right, Cmd+Shift+D down)
+keybind = cmd+d=new_split:right
+keybind = cmd+shift+d=new_split:down
+
+# Navigate (vim directions)
+keybind = cmd+alt+h=goto_split:left
+keybind = cmd+alt+j=goto_split:bottom
+keybind = cmd+alt+k=goto_split:top
+keybind = cmd+alt+l=goto_split:right
+
+# Resize (40px steps)
+keybind = cmd+ctrl+h=resize_split:left,40
+keybind = cmd+ctrl+j=resize_split:down,40
+keybind = cmd+ctrl+k=resize_split:up,40
+keybind = cmd+ctrl+l=resize_split:right,40
+keybind = cmd+ctrl+equal=equalize_splits
+
+# Zoom focused split (maximize/restore) — default is
+# cmd+shift+enter; declared here for explicitness
+keybind = cmd+shift+enter=toggle_split_zoom
+
+# ------------------------------------------------------------
+# 11. Scrollback navigation and capture
+#     Cmd+Up/Down jump between prompts (shell integration)
+# ------------------------------------------------------------
+keybind = cmd+up=jump_to_prompt:-1
+keybind = cmd+down=jump_to_prompt:1
+keybind = cmd+k=clear_screen
+# Dump the full scrollback to a temp file and open it —
+# searchable/yankable in your $EDITOR or default app
+keybind = cmd+shift+f=write_screen_file:open
+
+# ------------------------------------------------------------
+# 12. Command palette (Ghostty >= 1.2) — declared for clarity
+# ------------------------------------------------------------
+keybind = cmd+shift+p=toggle_command_palette
+keybind = cmd+shift+comma=reload_config
+
+# ------------------------------------------------------------
+# 13. Optional: tmux-style leader sequences
+#     Uncomment if you want chorded bindings. Note: ctrl+a
+#     conflicts with vim's increment and emacs-mode zsh
+#     beginning-of-line; cmd+s is a safer leader on macOS.
+# ------------------------------------------------------------
+# keybind = cmd+s>c=new_tab
+# keybind = cmd+s>\=new_split:right
+# keybind = cmd+s>minus=new_split:down
+# keybind = cmd+s>z=toggle_split_zoom
+# keybind = cmd+s>o=toggle_tab_overview
+
+# ------------------------------------------------------------
+# 14. Optional: quick-terminal-only mode
+#     If you ever run Ghostty purely as a dropdown (iTerm2
+#     hotkey-window-only style), hide it from Dock/Cmd+Tab:
+# ------------------------------------------------------------
+# macos-hidden = always

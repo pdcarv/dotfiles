@@ -1,11 +1,6 @@
-# Vim
-vim/plugged/
-vim/undodir/
-vim/swap/
-vim/backup/
-vim/.netrwhist
-vim/view/
-vim/autoload/plug.vim.old
+# Personal IDE preferences
+.idea/
+.vscode/
 
 # OS generated files
 .DS_Store
@@ -42,3 +37,5 @@ docker/
 Cheffile
 Cheffile.lock
 Vagrantfile
+
+**/.claude/settings.local.json

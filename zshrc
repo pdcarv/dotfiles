@@ -1,6 +1,10 @@
 # Load local config if it exists
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
+# Load .ghc
+[ -f "$HOME/.ghcup/env" ] && source "$HOME/.ghcup/env"
+
+
 # Performance optimization - zshrc compilation
 if [[ ! -f ~/.zshrc.zwc || ~/.zshrc -nt ~/.zshrc.zwc ]]; then
     zcompile ~/.zshrc
@@ -125,10 +129,14 @@ zle -N complete-with-dots
 bindkey "^I" complete-with-dots
 
 # Modern CLI tool alternatives - with better command detection
-if (( $+commands[exa] )); then
-    alias ls='exa'
-    alias ll='exa -l'
-    alias la='exa -la'
+if (( $+commands[eza] )); then
+    alias ls='eza'
+    alias ll='eza -l'
+    alias la='eza -la'
+else
+    alias ls='ls -G'
+    alias ll='ls -lG'
+    alias la='ls -lGA'
 fi
 
 if (( $+commands[bat] )); then
@@ -336,3 +344,8 @@ else
     echo "If Starship is already installed but not being detected, run: touch ~/.starship_installed"
   fi
 fi
+
+# opencode
+export PATH=/Users/pedrocarvalho/.opencode/bin:$PATH
+alias cardbackup="$HOME/bin/card-backup.sh"
+

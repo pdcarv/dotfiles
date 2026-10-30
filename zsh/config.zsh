@@ -1,14 +1,8 @@
 autoload -U promptinit && promptinit
-autoload -Uz compinit
-if [ $(date +'%j') != $(stat -f '%Sm' -t '%j' ~/.zcompdump) ]; then
-  compinit
-else
-  compinit -C
-fi
 
 setopt autocd
 setopt extendedglob
-setopt correct correct_all
+setopt correct
 setopt prompt_subst
 unsetopt flow_control
 

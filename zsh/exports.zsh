@@ -5,6 +5,7 @@ export PATH="/usr/local/bin:/usr/local/sbin:$PATH"
 export PATH="$HOME/scripts:$PATH"
 export PATH="$HOME/bin:$PATH"
 export PATH="$HOME/.rbenv/bin:$PATH"
+export PATH="$HOME/.ghcup/env:$PATH"
 
 # Node.js
 export NODE_PATH="/usr/local/lib/node_modules"
@@ -43,9 +44,7 @@ export LC_ALL="en_US.UTF-8"
 export CLICOLOR=1
 export LSCOLORS=ExFxBxDxCxegedabagacad
 
-# FZF
-export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --preview 'bat --style=numbers --color=always {}'"
-export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+# FZF config lives in zshrc's lazy _fzf_init_and_run (deferred until first use)
 
 # Development
 export PYTHONDONTWRITEBYTECODE=1  # Prevent Python from writing .pyc files
@@ -64,3 +63,5 @@ export PATH="$GOPATH/bin:$PATH"
 # Rust
 export PATH="$HOME/.cargo/bin:$PATH"
 
+# Force use of podman-compose
+export PODMAN_COMPOSE_PROVIDER=podman-compose
