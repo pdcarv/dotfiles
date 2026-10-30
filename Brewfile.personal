@@ -1,0 +1,35 @@
+# Personal machine only. Install: brew bundle install --file Brewfile.personal
+
+# Build tooling
+brew "cmake"
+brew "gcc"
+brew "make"
+brew "rsync"
+brew "tree"
+brew "node"
+brew "sbt"
+
+# iOS
+brew "cocoapods"
+brew "xcodegen"
+
+# Images and documents
+brew "exiftool"
+brew "ghostscript"
+brew "imagemagick"
+brew "img2pdf"
+
+# Network, containers, k8s
+brew "dnsperf"
+brew "kubernetes-cli"
+brew "podman-compose"
+
+# Python (legacy; uv is the default)
+brew "pipenv"
+
+# Apps
+cask "claude-code"
+cask "font-jetbrains-mono"
+cask "lulu"
+cask "multipass"
+cask "rectangle"
