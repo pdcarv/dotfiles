@@ -19,6 +19,7 @@ brew "hyperfine"
 brew "neovim"
 brew "tree-sitter-cli"
 brew "tmux"
+brew "herdr"
 cask "ghostty", args: { adopt: true }
 cask "font-jetbrains-mono-nerd-font"
 

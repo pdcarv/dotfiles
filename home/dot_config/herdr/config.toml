@@ -1,0 +1,49 @@
+onboarding = false
+
+[theme]
+# Follow Ghostty through the ANSI palette, like tmux, fzf and starship
+name = "terminal"
+
+[keys]
+# Same prefix as tmux.conf
+prefix = "ctrl+a"
+next_agent = "prefix+."
+previous_agent = "prefix+,"
+focus_agent = "prefix+alt+1..9"
+last_pane = "prefix+;"
+open_worktree = "prefix+shift+o"
+remove_worktree = "prefix+shift+e"
+
+[[keys.command]]
+key = "prefix+t"
+type = "popup"
+command = "exec \"${SHELL:-sh}\""
+description = "scratch shell"
+width = "80%"
+height = "80%"
+
+[[keys.command]]
+key = "prefix+alt+g"
+type = "popup"
+command = 'cd "$HERDR_ACTIVE_PANE_CWD" && lazygit'
+description = "lazygit"
+width = "90%"
+height = "90%"
+
+[ui]
+agent_panel_sort = "priority"
+status_indicators = "symbols"
+show_agent_labels_on_pane_borders = true
+prompt_new_tab_name = false
+tab_bar_right = [
+  { type = "zoom" },
+  { type = "command", command = 'git -C "${HERDR_ACTIVE_PANE_CWD:-.}" branch --show-current 2>/dev/null', interval_seconds = 2, timeout_seconds = 1 },
+  { type = "datetime", format = "%H:%M" },
+]
+tab_bar_right_separator = " · "
+
+[ui.sidebar.agents.rows_by_agent]
+claude = [["state_icon", "workspace", "tab"], [{ token = "terminal_title_stripped", dim = true }]]
+
+[ui.toast]
+delivery = "terminal"
