@@ -7,7 +7,7 @@ macOS development environment for a personal and a work Mac, managed with
 
 | Path | Contents |
 |---|---|
-| `home/` | chezmoi source state (selected by `.chezmoiroot`): zsh, git, tmux, herdr, Ghostty, starship, bat, mise, atuin, Hammerspoon (config only; not in the Brewfiles), vim |
+| `home/` | chezmoi source state (selected by `.chezmoiroot`): zsh, git, tmux, herdr, Ghostty, starship, bat, mise, atuin, Hammerspoon (config only; not in the Brewfiles), vim, Claude Code status line |
 | `nvim/` | Neovim config, linked as one directory to `~/.config/nvim` |
 | `Brewfile`, `Brewfile.personal`, `Brewfile.work` | Homebrew packages, shared and per machine |
 
